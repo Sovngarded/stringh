@@ -3,8 +3,7 @@
 int s21_strncmp(const char *str1, const char *str2, s21_size_t n){
     int result = 0;
 
-
-
+    if (n == 0) return 0;
     if(str1 != S21_NULL || str2 != S21_NULL){
     for(s21_size_t i =0;i<n;i++){
     

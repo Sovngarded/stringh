@@ -1,0 +1,48 @@
+CC=gcc
+CFLAGS=-Wall -Wextra -Werror -std=c11
+FILES = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c \
+		s21_strchr.c s21_strcspn.c s21_strlen.c s21_strncat.c \
+		s21_strncmp.c s21_strncpy.c s21_strrchr.c s21_strstr.c \
+		s21_strtok.c 
+FILE_TESTS =./tests/test_me.c ./tests/test_memchr.c ./tests/test_memcmp.c ./tests/test_memcpy.c \
+		./tests/test_memset.c ./tests/test_strncat.c ./tests/test_strchr.c ./tests/test_strncmp.c \
+		./tests/test_strncpy.c ./tests/test_strlen.c ./tests/test_strrchr.c ./tests/test_strtok.c \
+		./tests/test_strstr.c ./tests/test_strcspn.c
+
+TARGET=s21_string.a
+TEST_FLAGS = -lcheck
+
+all: gcov_report
+
+$(TARGET): 
+	$(CC) ${CFLAGS} -c ${FILES}
+	ar rc libs21_string.a s21*.o
+	ranlib libs21_string.a
+	cp libs21_string.a s21_string.a
+
+test: $(TARGET)
+	$(CC) ${CFLAGS} ${FILES} ${FILE_TESTS} s21_string.h ${TEST_FLAGS} -o s21_string --coverage
+	@echo "---------------------------TESTS--------------------------------------" 
+	./s21_string
+	@echo "----------------------------------------------------------------------"
+
+gcov_report: test 
+	lcov -t "test" -o test.info -c -d .	
+	genhtml -o report test.info
+	open ./report/src/index.html
+
+clean:
+	rm -rf s21_math
+	rm -rf *.out
+	rm -rf *.o
+	rm -rf *.a
+	rm -rf *.gcno
+	rm -rf *.gch
+	rm -rf *.gcda
+	rm -rf *.gcov
+	rm -rf *.info
+	rm -rf *.html
+	rm -rf *.css
+	rm -rf test
+	rm -rf gcov_test
+	rm -rf test report
