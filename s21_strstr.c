@@ -16,5 +16,5 @@ char *s21_strstr(const char *haystack, const char *needle) {
         }
         haystack++;
     }
-    return NULL;
+    return S21_NULL;
 }

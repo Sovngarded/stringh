@@ -2,7 +2,7 @@
 
 START_TEST(strchr_1) {
   char s[] = "Hello, world!";
-  int ch = 'h';
+  int ch = 'm';
   ck_assert_pstr_eq(strchr(s, ch), s21_strchr(s, ch));
 }
 END_TEST
