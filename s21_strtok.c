@@ -1,27 +1,27 @@
 #include "s21_string.h"
 
 char *s21_strtok(char *str, const char *delim){
-    static char* last_token = NULL;
+    static char* last_token = S21_NULL;
     char* token_start;
 
-    if (str != NULL) {
+    if (str != S21_NULL) {
         last_token = str;
-    } else if (last_token == NULL || *last_token == '\0') {
-        return NULL;
+    } else if (last_token == S21_NULL || *last_token == '\0') {
+        return S21_NULL;
     }
 
-    while (*last_token != '\0' && s21_strchr(delim, *last_token) != NULL) {
+    while (*last_token != '\0' && s21_strchr(delim, *last_token) != S21_NULL) {
         last_token++;
     }
 
     if (*last_token == '\0') {
-        last_token = NULL;
-        return NULL;
+        last_token = S21_NULL;
+        return S21_NULL;
     }
 
     token_start = last_token;
 
-    while (*last_token != '\0' && s21_strchr(delim, *last_token) == NULL) {
+    while (*last_token != '\0' && s21_strchr(delim, *last_token) == S21_NULL) {
         last_token++;
     }
 
