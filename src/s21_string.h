@@ -23,11 +23,11 @@ char *s21_strncpy(char *dest, const char *src, s21_size_t n);
 
 s21_size_t s21_strcspn(const char *str1, const char *str2);
 
-char *strerror(int errnum);  // in progress 
+char* s21_strerror(int errnum);  // in progress 
 
 s21_size_t s21_strlen(const char *str);
 
-char *strpbrk(const char *str1, const char *str2);  // in progress 
+char *s21_strpbrk(const char *str1, const char *str2);  // in progress 
 
 char *s21_strrchr(const char *str, int c);
 

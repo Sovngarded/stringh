@@ -3,11 +3,11 @@ CFLAGS=-Wall -Wextra -Werror -std=c11
 FILES = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c \
 		s21_strchr.c s21_strcspn.c s21_strlen.c s21_strncat.c \
 		s21_strncmp.c s21_strncpy.c s21_strrchr.c s21_strstr.c \
-		s21_strtok.c 
+		s21_strtok.c s21_strerror.c s21_strpbrk.c
 FILE_TESTS =./tests/test_me.c ./tests/test_memchr.c ./tests/test_memcmp.c ./tests/test_memcpy.c \
 		./tests/test_memset.c ./tests/test_strncat.c ./tests/test_strchr.c ./tests/test_strncmp.c \
 		./tests/test_strncpy.c ./tests/test_strlen.c ./tests/test_strrchr.c ./tests/test_strtok.c \
-		./tests/test_strstr.c ./tests/test_strcspn.c
+		./tests/test_strstr.c ./tests/test_strcspn.c ./tests/test_strerror.c ./tests/test_strpbrk.c
 
 TARGET=s21_string.a
 TEST_FLAGS = -lcheck
