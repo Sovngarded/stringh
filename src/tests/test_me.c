@@ -2,6 +2,14 @@
 
 int main(void) {
   int failed = 0;
+printf("..........／＞　  フ.....................\n");
+printf("　　　　　| 　_　 _|\n");
+printf("　 　　　／`ミ _x 彡\n");
+printf("　　 　 /　　　 　 |\n");
+printf("　　　 /　 ヽ　　 ﾉ\n");
+printf("　／￣|　　 |　|　|\n");
+printf("　| (￣ヽ＿_ヽ_)_)\n");
+printf("　＼二つ\n");
 Suite *s21_string_test[] = {test_memchr(),
                               test_memcmp(),
                               test_memcpy(),
