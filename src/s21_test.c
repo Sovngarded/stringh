@@ -27,11 +27,12 @@ int main(){
    // // Сравниваем первые пять символов двух строк
    //    printf("%d",s21_strncmp (str1, str2,9));
      
-   char s[] = "Hello, world!";
-  int ch = 'm';
-  printf("%s",s21_strchr(s,ch));
-
-
+//    char s[] = "Hello, world!";
+//   int ch = 'm';
+//   printf("%s",s21_strchr(s,ch));
+    char str[10];
+    printf("%d", s21_sprintf(str,"%d.123"));
+    // printf("%d",s21_sprintf(str1))
 
 //  // Массив со строкой для поиска
 //    char str [24]="test1/test2/test3/test4";
