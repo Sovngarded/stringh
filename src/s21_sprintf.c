@@ -17,6 +17,7 @@ int s21_sprintf(char *str, const char *format, ...){
 
     while(*format){
         if(*format == '%'){
+            format++;
             options.number_system = 10;
             format = set_options(&options, format, &arg);
 
@@ -24,7 +25,7 @@ int s21_sprintf(char *str, const char *format, ...){
 
             //do parser 
         }else{
-            printf("%c ",*format);
+            //printf("%c ",*format);
              *str = *format;
              str++;
         }
@@ -47,14 +48,13 @@ int s21_sprintf(char *str, const char *format, ...){
 const char *set_options(Options *options, const char *format, va_list *arg){
     //format = get_options(format,options);
    
-
-
-
+    //s21_sprintf(str1,"hello %14(width).3(accur)d(type)",2);
+    format = get_width(format,&options->width,arg);
     switch(*format){
         case '.':{
             options->is_dot = 1;
             format++;
-            format = get_width(format,&options->width,arg);
+            format = get_width(format,&options->accuracy,arg);
         }
         case 'L':{
             options->addit_type = 'L';
@@ -65,47 +65,49 @@ const char *set_options(Options *options, const char *format, va_list *arg){
         case 'h':{
             options->addit_type='h';
         }
+    
     }
-
 }
 
-const char *get_options(const char *format, Options *options){
-    while(format){
-        switch(*format){
-            case '+':{
-                options->is_plus = 1;
-            }
-            case '-':{  
-                options->is_minus = 1;
-            }
-            case ' ':{
-                options->is_blank = 1;
-            }
-            case '#':{
-                options->is_hash = 1;
-            }
-            case '0':{
-                options->is_zero = 1;
-            }
-            default: break;
-        format++;
-        }
+// const char *get_options(const char *format, Options *options){
+//     while(format){
+//         switch(*format){
+//             case '+':{
+//                 options->is_plus = 1;
+//             }
+//             case '-':{  
+//                 options->is_minus = 1;
+//             }
+//             case ' ':{
+//                 options->is_blank = 1;
+//             }
+//             case '#':{
+//                 options->is_hash = 1;
+//             }
+//             case '0':{
+//                 options->is_zero = 1;
+//             }
+//             default: break;
+//         format++;
+//         }
 
 
 
-    }
-    return format;
-}
+//     }
+//     return format;
+// }
 
 const char *get_width(const char *format, int *width, va_list *arg){
     *width = 0;
+
     while(format){
+       // printf("%c ",*format);
         if('0' <= *format && *format <= '9'){
             *width *=10;
             *width += *format - '0';
         }else break;
         format++;
     }
-    printf("%d",width);
+    printf("%d",*width);
     return format;
 }

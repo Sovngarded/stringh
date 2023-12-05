@@ -7,7 +7,8 @@ FILES = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c \
 FILE_TESTS =./tests/test_me.c ./tests/test_memchr.c ./tests/test_memcmp.c ./tests/test_memcpy.c \
 		./tests/test_memset.c ./tests/test_strncat.c ./tests/test_strchr.c ./tests/test_strncmp.c \
 		./tests/test_strncpy.c ./tests/test_strlen.c ./tests/test_strrchr.c ./tests/test_strtok.c \
-		./tests/test_strstr.c ./tests/test_strcspn.c ./tests/test_strerror.c ./tests/test_strpbrk.c
+		./tests/test_strstr.c ./tests/test_strcspn.c ./tests/test_strerror.c ./tests/test_strpbrk.c \
+		./tests/s21_strncmp ./tests/s21_strncpy
 
 TARGET=s21_string.a
 TEST_FLAGS = -lcheck
