@@ -17,20 +17,6 @@ char *s21_strrchr(const char *str, int c){
         if(*str == c){
             address = (char *)str;
         }
-
-
-
-        
-
-
-
-
     }
-
-
-
-
-
-
     return address;
 }
