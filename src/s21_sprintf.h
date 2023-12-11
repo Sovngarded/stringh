@@ -13,12 +13,15 @@ typedef struct
     int width;
     int accuracy;
     int number_system;
-    char addit_type;  
-    int for_size;  
+    char addit_type;    
+    int upper_case;
+    int flag_size;
 } Options;
 
 const char *set_options(Options *options, const char *format, va_list *arg);
 const char *get_options(const char *format, Options *options);
 const char *get_width(const char *format, int *width, va_list *arg);
-
+Options set_number_system(Options options, char format);
+char *print_u(char *str, Options options, char format, va_list *arg);
+int unsigned_decimal_to_string(char *str_buff,Options options, unsigned long int buff, s21_size_t size_num);
 #endif
