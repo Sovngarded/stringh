@@ -3,6 +3,7 @@
 #define S21_NULL (void *)0
 #include <stdio.h>
 #include <stdlib.h>
+#define ALPHABET 32 
 
 typedef struct 
 {
@@ -32,6 +33,7 @@ char* print_decimal(char* str, Options options, va_list* arg);
 s21_size_t get_size(long int number, Options* options);
 int write_to_string(long int number, Options options, char* string_for_number, s21_size_t size);
 char* parser(char* str, char* copy_str, const char *format, Options options, va_list *arg);
+char convert_num_to_char(int num, int upper_case);
 
 
 int s21_sprintf(char *str, const char *format, ...){
@@ -47,7 +49,6 @@ int s21_sprintf(char *str, const char *format, ...){
             Options options = {0};
             options.number_system = 10;
             format = set_options(&options, format, &arg);
-            //do parser// 
             str = parser(str, copy_str, format, options, &arg);
         }else {
             //printf("%c ",*format);
@@ -59,7 +60,6 @@ int s21_sprintf(char *str, const char *format, ...){
     }
 
     *str = '\0';
-   // printf("%s",str);
     va_end(arg);
     
     return (str - copy_str); 
@@ -68,7 +68,6 @@ int s21_sprintf(char *str, const char *format, ...){
 
 const char *set_options(Options *options, const char *format, va_list *arg){
     format = get_options(format, options);
-    //s21_sprintf(str1,"hello %14(width).3(accur)d(type)",2);
     format = get_width(format, &options->width, arg);
     switch(*format){
         case '.':{
@@ -76,15 +75,19 @@ const char *set_options(Options *options, const char *format, va_list *arg){
             options->is_zero = 0;
             format++;
             format = get_width(format,&options->accuracy,arg);
+            break;
         }
         case 'L':{
             options->addit_type = 'L';
+            break;
         }
         case 'l':{
             options->addit_type = 'l';
+            break;
         }
         case 'h':{
             options->addit_type='h';
+            break;
         }
     }
    //here should be logic for width<0, but it's unreal situation
@@ -114,11 +117,15 @@ const char *get_options(const char *format, Options *options){
             case '0':{
                 options->is_zero = 1;
                 break;
+
             }
-            default: {flag = 1; break;};
+            default: 
+                flag = 1;
+                break;
+        
         }
-        if(flag) break;
-         format++;
+        if(flag = 1) break;
+        format++;
     }
     options->is_blank = (options->is_blank && !options->is_plus);
     options->is_zero = (options->is_zero && !options->is_minus);
@@ -141,7 +148,7 @@ const char *get_width(const char *format, int *width, va_list *arg){
         } else break;
         format++;
     }
-   // printf("%d",*width);
+    printf("%d",*width);
     return format;
 }
 
@@ -182,14 +189,14 @@ char* print_decimal(char* str, Options options, va_list* arg){
             *str = string_for_number[j];
             str++;
         }
-        while(i<options.width) {
+        while(i < options.width) {
             *str = ' ';
             str++;
         }
     }
+
     if(string_for_number) free(string_for_number);
     return str;
-    
 }
 
 s21_size_t get_size(long int number, Options* options) {
@@ -232,22 +239,23 @@ int write_to_string(long int number, Options options, char* string_for_number, s
     }
 
     int i = 0;
+    long int number_copy = number;
 
-    if( (number == 0 && (options.accuracy || options.width || options.is_blank)) || 
-    (number == 0 && !options.accuracy && !options.width && !options.is_blank && !options.is_dot)) {
-        char c = number % options.number_system + '0';
+    if( (number_copy == 0 && (options.accuracy || options.width || options.is_blank)) || 
+    (number_copy == 0 && !options.accuracy && !options.width && !options.is_blank && !options.is_dot)) {
+        //char c = number % options.number_system + '0';
+        char c = convert_num_to_char(number_copy % options.number_system, options.upper_case);
         string_for_number[i] = c;
         i++;
         size--;
-        //number /= 10; //useless move
     }
 
-    while(number != 0 && string_for_number && size) {
-        char c = number % options.number_system + '0'; //>????
+    while(number_copy != 0 && string_for_number && size) {
+        char c = convert_num_to_char(number_copy % options.number_system, options.upper_case);
         string_for_number[i] = c;
         i++;
         size--;
-        number /= 10;
+        number_copy /= 10;
     }
 
     if(change_sign == 1) number = -number;
@@ -282,7 +290,6 @@ int write_to_string(long int number, Options options, char* string_for_number, s
         i++;
         size--;
     } 
-    //number always zero ?
     if(number > 0 && options.is_plus && size) {
         string_for_number[i] = '+';
         i++;
@@ -303,6 +310,35 @@ int write_to_string(long int number, Options options, char* string_for_number, s
 
 
 //decimal
+
+char convert_num_to_char(int num, int upper_case) {
+    char flag = '0';
+    switch(num){
+        case 10:
+            flag = (char)('a'- upper_case * ALPHABET);
+            break;
+        case 11:
+            flag = (char)('b'- upper_case * ALPHABET);
+            break;
+        case 12:
+            flag = (char)('c'- upper_case * ALPHABET);
+            break;        
+        case 13:
+            flag = (char)('d'- upper_case * ALPHABET);
+            break;       
+        case 14:
+            flag = (char)('e'- upper_case * ALPHABET);
+            break;
+        case 15:
+            flag = (char)('f'- upper_case * ALPHABET);
+            break;
+    }
+
+    if (0<= num && num >= 9) flag = (char) (num + '0');
+
+    return flag;
+
+}
 
 
 Options set_number_system(Options options, char format){
@@ -439,15 +475,10 @@ char *print_c(char *str, Options options, int symbol){
     }
 
 
-int main(){
-
-
-
+int main() { 
     char str[10];
-    //printf("%d", s21_sprintf(str,"%123"));
-    s21_sprintf(str,"%c",'a');
-    printf("%s",str);
-
-
+    printf("heelo\n");
+    s21_sprintf(str, "%9.4d", 543);
+    printf("%s", str);
     return 0;
 }

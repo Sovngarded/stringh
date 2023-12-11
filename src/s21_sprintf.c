@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include "s21_sprintf.h"
-
+#define ALPHABET 32 
 
 
 int s21_sprintf(char *str, const char *format, ...){
@@ -427,4 +427,4 @@ char *print_c(char *str, Options options, int symbol){
     ptr = str;
         }
         return ptr;
-    }
+}
