@@ -439,15 +439,10 @@ char *print_c(char *str, Options options, int symbol){
     }
 
 
-int main(){
-
-
-
+int main() { 
     char str[10];
-    //printf("%d", s21_sprintf(str,"%123"));
-    s21_sprintf(str,"%c",'a');
-    printf("%s",str);
-
-
+    printf("heelo\n");
+    s21_sprintf(str, "%d", 543);
+    printf("%s", str);
     return 0;
 }

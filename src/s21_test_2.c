@@ -34,6 +34,8 @@ s21_size_t get_size(long int number, Options* options);
 int write_to_string(long int number, Options options, char* string_for_number, s21_size_t size);
 char* parser(char* str, char* copy_str, const char *format, Options options, va_list *arg);
 char convert_num_to_char(int num, int upper_case);
+char *print_s(char *str,Options options, va_list *arg);
+Options set_opt_double(Options options, char format);
 
 
 int s21_sprintf(char *str, const char *format, ...){
@@ -51,7 +53,6 @@ int s21_sprintf(char *str, const char *format, ...){
             format = set_options(&options, format, &arg);
             str = parser(str, copy_str, format, options, &arg);
         }else {
-            //printf("%c ",*format);
              *str = *format;
              str++;
         }
@@ -68,6 +69,7 @@ int s21_sprintf(char *str, const char *format, ...){
 
 const char *set_options(Options *options, const char *format, va_list *arg){
     format = get_options(format, options);
+    //s21_sprintf(str1,"hello %14(width).3(accur)d(type)",2);
     format = get_width(format, &options->width, arg);
     switch(*format){
         case '.':{
@@ -75,19 +77,15 @@ const char *set_options(Options *options, const char *format, va_list *arg){
             options->is_zero = 0;
             format++;
             format = get_width(format,&options->accuracy,arg);
-            break;
         }
         case 'L':{
             options->addit_type = 'L';
-            break;
         }
         case 'l':{
             options->addit_type = 'l';
-            break;
         }
         case 'h':{
             options->addit_type='h';
-            break;
         }
     }
    //here should be logic for width<0, but it's unreal situation
@@ -117,15 +115,11 @@ const char *get_options(const char *format, Options *options){
             case '0':{
                 options->is_zero = 1;
                 break;
-
             }
-            default: 
-                flag = 1;
-                break;
-        
+            default: {flag = 1; break;};
         }
-        if(flag = 1) break;
-        format++;
+        if(flag) break;
+         format++;
     }
     options->is_blank = (options->is_blank && !options->is_plus);
     options->is_zero = (options->is_zero && !options->is_minus);
@@ -148,13 +142,25 @@ const char *get_width(const char *format, int *width, va_list *arg){
         } else break;
         format++;
     }
-    printf("%d",*width);
+   // printf("%d",*width);
     return format;
 }
 
 char* parser(char* str, char* copy_str, const char *format, Options options, va_list *arg) {
     if (*format == 'd' || *format == 'i') {
         str = print_decimal(str, options, arg);
+    }else if(*format == 'c'){
+        int symbol = va_arg(*arg,int);
+        str = print_c(str,options,symbol);
+    }else if(*format == '%'){
+        str = print_c(str,options,'%');
+    }
+    // else if(*format == 's'){
+    //     str = print_s(str,options,arg);
+    // }
+    else if(*format == 'n'){
+        int *n = va_arg(*arg,int *);
+        *n = (int)(str - copy_str);
     }
     if(!str) *str = '\0';
     return str;
@@ -194,9 +200,9 @@ char* print_decimal(char* str, Options options, va_list* arg){
             str++;
         }
     }
-
     if(string_for_number) free(string_for_number);
     return str;
+    
 }
 
 s21_size_t get_size(long int number, Options* options) {
@@ -243,7 +249,7 @@ int write_to_string(long int number, Options options, char* string_for_number, s
 
     if( (number_copy == 0 && (options.accuracy || options.width || options.is_blank)) || 
     (number_copy == 0 && !options.accuracy && !options.width && !options.is_blank && !options.is_dot)) {
-        //char c = number % options.number_system + '0';
+        // char c = number % options.number_system + '0';
         char c = convert_num_to_char(number_copy % options.number_system, options.upper_case);
         string_for_number[i] = c;
         i++;
@@ -251,7 +257,8 @@ int write_to_string(long int number, Options options, char* string_for_number, s
     }
 
     while(number_copy != 0 && string_for_number && size) {
-        char c = convert_num_to_char(number_copy % options.number_system, options.upper_case);
+        //char c = convert_num_to_char(number_copy % options.number_system, options.upper_case);
+        char c = number_copy % options.number_system + '0'; //>????
         string_for_number[i] = c;
         i++;
         size--;
@@ -272,7 +279,6 @@ int write_to_string(long int number, Options options, char* string_for_number, s
     while(options.is_zero && string_for_number && (size - options.flag_size > 0) && (options.accuracy || change_sign) ){
         if(size == 1 && options.flag_size == 1)
             break;
-
         string_for_number[i] = '0';
         i++;
         size--;
@@ -290,6 +296,7 @@ int write_to_string(long int number, Options options, char* string_for_number, s
         i++;
         size--;
     } 
+    //number always zero ?
     if(number > 0 && options.is_plus && size) {
         string_for_number[i] = '+';
         i++;
@@ -307,7 +314,6 @@ int write_to_string(long int number, Options options, char* string_for_number, s
 
     return i;
 }
-
 
 //decimal
 
@@ -474,11 +480,68 @@ char *print_c(char *str, Options options, int symbol){
         return ptr;
     }
 
+// char *print_s(char *str,Options options, va_list *arg){
+//     char *ptr = str;
+//     char *string = va_arg(*arg,char *);
+
+//     if(string){
+//         int tmp= options.width, i = 0;
+
+//         if((s21_size_t)options.width <s21_strlen(string)) options.width = s21_strlen(string);
+//         int blank = options.width - s21_strlen(string);
+
+//         if(options.accuracy == 0) options.accuracy = options.width;
+
+//         if(options.accuracy != 0 && options.accuracy <tmp)blank = tmp-options.accuracy;
+
+
+//         while(blank && !options.is_minus){
+//             *str = ' ';
+//             str++;
+//             blank--;
+//         }
+//         while (*string != '\0')
+//         {
+//             if(!options.accuracy) break;
+//             *str = *string;
+//             str++;
+//             string++;
+//             i++;
+//             options.accuracy--;
+//         }
+
+//         while(blank && options.is_minus){
+//             *str = ' ';
+//             str++;
+//             blank--;
+//         }
+        
+//     }else  {
+//         str = s21_memcpy(str,"(null)",6);
+//         str+=6;
+
+//     }
+
+//     if(ptr)ptr = str;
+
+
+//     return ptr;
+// }
+
+// Options set_opt_double(Options options, char format){
+//     if(format == 'g' || format == 'G') options.g = 1;
+// }
 
 int main() { 
     char str[10];
     printf("heelo\n");
-    s21_sprintf(str, "%9.4d", 543);
+    s21_sprintf(str, "%5.-9d", 543);
     printf("%s", str);
+
+    printf("\nheelo\n");
+
+    char str2[10];
+    sprintf(str2, "%-5.-9d", 543);
+    printf("%s", str2);
     return 0;
 }

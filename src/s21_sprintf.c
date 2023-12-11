@@ -18,10 +18,8 @@ int s21_sprintf(char *str, const char *format, ...){
             Options options = {0};
             options.number_system = 10;
             format = set_options(&options, format, &arg);
-            //do parser// 
             str = parser(str, copy_str, format, options, &arg);
         }else {
-            //printf("%c ",*format);
              *str = *format;
              str++;
         }
@@ -30,7 +28,6 @@ int s21_sprintf(char *str, const char *format, ...){
     }
 
     *str = '\0';
-   // printf("%s",str);
     va_end(arg);
     
     return (str - copy_str); 
@@ -213,22 +210,24 @@ int write_to_string(long int number, Options options, char* string_for_number, s
     }
 
     int i = 0;
+    long int number_copy = number;
 
-    if( (number == 0 && (options.accuracy || options.width || options.is_blank)) || 
-    (number == 0 && !options.accuracy && !options.width && !options.is_blank && !options.is_dot)) {
-        char c = number % options.number_system + '0';
+    if( (number_copy == 0 && (options.accuracy || options.width || options.is_blank)) || 
+    (number_copy == 0 && !options.accuracy && !options.width && !options.is_blank && !options.is_dot)) {
+        // char c = number % options.number_system + '0';
+        char c = convert_num_to_char(number_copy % options.number_system, options.upper_case);
         string_for_number[i] = c;
         i++;
         size--;
-        //number /= 10; //useless move
     }
 
-    while(number != 0 && string_for_number && size) {
-        char c = number % options.number_system + '0'; //>????
+    while(number_copy != 0 && string_for_number && size) {
+        char c = convert_num_to_char(number_copy % options.number_system, options.upper_case);
+        //char c = number % options.number_system + '0'; //>????
         string_for_number[i] = c;
         i++;
         size--;
-        number /= 10;
+        number_copy /= 10;
     }
 
     if(change_sign == 1) number = -number;
