@@ -470,4 +470,39 @@ char *print_s(char *str,Options options, va_list *arg){
 
 Options set_opt_double(Options options, char format){
     if(format == 'g' || format == 'G') options.g = 1;
+    else if(format == 'e' || format =='E') options.e = 1;
+    if(format == 'E' || format == 'G' || format == 'F') options.upper_case =1;
+    return options;
+}
+
+
+// char *print_double(char *str,Options options,char format, va_list *arg){
+//     long double num = 0;
+//     int e = 0;
+//     if(format == "L") num =va_arg(*arg,long double);
+//     else num = va_arg(*arg,double);
+
+//     s21_size_t size_double = get
+// }
+
+long double normalize(long double *num,Options *options){
+    int i = 0;
+    if(fabsl(*num)>1){
+        while (fabsl(*num)>10){
+            *num /= 10;
+            i++;
+            options->e = 2;
+        }
+    }else{
+        while(fabsl(*num)<0.999999){
+            if(*num == 0){
+                options->e = 2;
+                break;
+            }
+            *num *=10;
+            i++;
+            options->e=1;
+        }
+    }
+    return i;
 }
