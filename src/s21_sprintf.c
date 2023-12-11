@@ -18,7 +18,8 @@ int s21_sprintf(char *str, const char *format, ...){
             Options options = {0};
             options.number_system = 10;
             format = set_options(&options, format, &arg);
-            //do parser// str = parser(str, copy_str, format, options, arg);
+            //do parser// 
+            str = parser(str, copy_str, format, options, &arg);
         }else {
             //printf("%c ",*format);
              *str = *format;
@@ -29,6 +30,7 @@ int s21_sprintf(char *str, const char *format, ...){
     }
 
     *str = '\0';
+   // printf("%s",str);
     va_end(arg);
     
     return (str - copy_str); 
@@ -61,26 +63,33 @@ const char *set_options(Options *options, const char *format, va_list *arg){
 }
 
 const char *get_options(const char *format, Options *options){
+    int flag = 0;
     while(format){
         switch(*format){
             case '+':{
                 options->is_plus = 1;
+                break;
             }
             case '-':{  
                 options->is_minus = 1;
+                break;
             }
             case ' ':{
                 options->is_blank = 1;
+                break;
             }
             case '#':{
                 options->is_hash = 1;
+                break;
             }
             case '0':{
                 options->is_zero = 1;
+                break;
             }
-            default: break;
-        format++;
+            default: {flag = 1; break;};
         }
+        if(flag) break;
+         format++;
     }
     options->is_blank = (options->is_blank && !options->is_plus);
     options->is_zero = (options->is_zero && !options->is_minus);
@@ -103,13 +112,23 @@ const char *get_width(const char *format, int *width, va_list *arg){
         } else break;
         format++;
     }
-    printf("%d",*width);
+   // printf("%d",*width);
     return format;
 }
 
 char* parser(char* str, char* copy_str, const char *format, Options options, va_list *arg) {
     if (*format == 'd' || *format == 'i') {
         str = print_decimal(str, options, arg);
+    }else if(*format == 'c'){
+        int symbol = va_arg(*arg,int);
+        str = print_c(str,options,symbol);
+    }else if(*format == '%'){
+        str = print_c(str,options,'%');
+    }else if(*format == 's'){
+        str = print_s(str,options,arg);
+    }else if(*format == 'n'){
+        int *n = va_arg(*arg,int *);
+        *n = (int)(str - copy_str);
     }
     if(!str) *str = '\0';
     return str;
@@ -125,9 +144,9 @@ char* print_decimal(char* str, Options options, va_list* arg){
         case 'l':
             number = (long int)va_arg(*arg, long int);
             break;
-        case 'h':
-            number = (short)va_arg(*arg, short);
-            break;        
+        // case 'h':
+        //     number = (short)va_arg(*arg, short);
+        //     break;        
         default:
             number = (int)va_arg(*arg, int);
             break;
@@ -197,7 +216,7 @@ int write_to_string(long int number, Options options, char* string_for_number, s
 
     if( (number == 0 && (options.accuracy || options.width || options.is_blank)) || 
     (number == 0 && !options.accuracy && !options.width && !options.is_blank && !options.is_dot)) {
-        char c = number & options.number_system + '0';
+        char c = number % options.number_system + '0';
         string_for_number[i] = c;
         i++;
         size--;
@@ -205,7 +224,7 @@ int write_to_string(long int number, Options options, char* string_for_number, s
     }
 
     while(number != 0 && string_for_number && size) {
-        char c = number & options.number_system + '0'; //>????
+        char c = number % options.number_system + '0'; //>????
         string_for_number[i] = c;
         i++;
         size--;
@@ -244,6 +263,7 @@ int write_to_string(long int number, Options options, char* string_for_number, s
         i++;
         size--;
     } 
+    //number always zero ?
     if(number > 0 && options.is_plus && size) {
         string_for_number[i] = '+';
         i++;
@@ -398,3 +418,56 @@ char *print_c(char *str, Options options, int symbol){
         }
         return ptr;
     }
+
+char *print_s(char *str,Options options, va_list *arg){
+    char *ptr = str;
+    char *string = va_arg(*arg,char *);
+
+    if(string){
+        int tmp= options.width, i = 0;
+
+        if((s21_size_t)options.width <s21_strlen(string)) options.width = s21_strlen(string);
+        int blank = options.width - s21_strlen(string);
+
+        if(options.accuracy == 0) options.accuracy = options.width;
+
+        if(options.accuracy != 0 && options.accuracy <tmp)blank = tmp-options.accuracy;
+
+
+        while(blank && !options.is_minus){
+            *str = ' ';
+            str++;
+            blank--;
+        }
+        while (*string != '\0')
+        {
+            if(!options.accuracy) break;
+            *str = *string;
+            str++;
+            string++;
+            i++;
+            options.accuracy--;
+        }
+
+        while(blank && options.is_minus){
+            *str = ' ';
+            str++;
+            blank--;
+        }
+        
+    }else  {
+        str = s21_memcpy(str,"(null)",6);
+        str+=6;
+
+    }
+
+    if(ptr)ptr = str;
+
+
+    return ptr;
+}
+
+
+Options set_opt_double(Options options, char format){
+    if(format == 'g' || format == 'G') options.g = 1;
+}
