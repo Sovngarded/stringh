@@ -16,6 +16,8 @@ typedef struct
     char addit_type;    
     int upper_case;
     int flag_size;
+    int g;
+    int e;
 } Options;
 
 const char *set_options(Options *options, const char *format, va_list *arg);
