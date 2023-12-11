@@ -13,7 +13,8 @@ typedef struct
     int width;
     int accuracy;
     int number_system;
-    char addit_type;    
+    char addit_type;  
+    int for_size;  
 } Options;
 
 const char *set_options(Options *options, const char *format, va_list *arg);
