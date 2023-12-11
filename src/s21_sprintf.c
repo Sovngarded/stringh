@@ -220,3 +220,29 @@ int unsigned_decimal_to_string(char *str_buff,Options options, unsigned long int
     return i;
 
 }
+
+
+
+char *print_c(char *str, Options options, int symbol){
+    char *ptr = S21_NULL;
+    int i =0;
+    while(options.width -1 >0 && !options.is_minus){
+        *str = ' ';
+        str++;
+        i++;
+        options.width--;
+    }
+    if(symbol <= 127){
+        *str = symbol;
+        str++;
+        i++;
+        while(options.width -1 > 0 && options.is_minus){
+             *str = ' ';
+             str++;
+             i++;
+             options.width--;
+    }
+    ptr = str;
+        }
+        return ptr;
+    }
