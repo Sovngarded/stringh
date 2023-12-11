@@ -1,8 +1,37 @@
-#include "s21_string.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include "s21_sprintf.h"
 
+#include <stdarg.h>
+#define S21_NULL (void *)0
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct 
+{
+    int is_minus;
+    int is_plus;
+    int is_blank;
+    int is_hash;
+    int is_zero;
+    int is_dot;
+    int width;
+    int accuracy;
+    int number_system;
+    char addit_type;    
+    int upper_case;
+    int flag_size;
+} Options;
+
+typedef unsigned long s21_size_t;
+const char *set_options(Options *options, const char *format, va_list *arg);
+const char *get_options(const char *format, Options *options);
+const char *get_width(const char *format, int *width, va_list *arg);
+Options set_number_system(Options options, char format);
+char *print_u(char *str, Options options, char format, va_list *arg);
+int unsigned_decimal_to_string(char *str_buff,Options options, unsigned long int buff, s21_size_t size_num);
+char *print_c(char *str, Options options, int symbol);
+char* print_decimal(char* str, Options options, va_list* arg);
+s21_size_t get_size(long int number, Options* options);
+int write_to_string(long int number, Options options, char* string_for_number, s21_size_t size);
+char* parser(char* str, char* copy_str, const char *format, Options options, va_list *arg);
 
 
 int s21_sprintf(char *str, const char *format, ...){
@@ -18,7 +47,8 @@ int s21_sprintf(char *str, const char *format, ...){
             Options options = {0};
             options.number_system = 10;
             format = set_options(&options, format, &arg);
-            //do parser// str = parser(str, copy_str, format, options, arg);
+            //do parser// 
+            str = parser(str, copy_str, format, options, &arg);
         }else {
             //printf("%c ",*format);
              *str = *format;
@@ -29,6 +59,7 @@ int s21_sprintf(char *str, const char *format, ...){
     }
 
     *str = '\0';
+   // printf("%s",str);
     va_end(arg);
     
     return (str - copy_str); 
@@ -61,26 +92,33 @@ const char *set_options(Options *options, const char *format, va_list *arg){
 }
 
 const char *get_options(const char *format, Options *options){
+    int flag = 0;
     while(format){
         switch(*format){
             case '+':{
                 options->is_plus = 1;
+                break;
             }
             case '-':{  
                 options->is_minus = 1;
+                break;
             }
             case ' ':{
                 options->is_blank = 1;
+                break;
             }
             case '#':{
                 options->is_hash = 1;
+                break;
             }
             case '0':{
                 options->is_zero = 1;
+                break;
             }
-            default: break;
-        format++;
+            default: {flag = 1; break;};
         }
+        if(flag) break;
+         format++;
     }
     options->is_blank = (options->is_blank && !options->is_plus);
     options->is_zero = (options->is_zero && !options->is_minus);
@@ -103,7 +141,7 @@ const char *get_width(const char *format, int *width, va_list *arg){
         } else break;
         format++;
     }
-    printf("%d",*width);
+   // printf("%d",*width);
     return format;
 }
 
@@ -125,9 +163,9 @@ char* print_decimal(char* str, Options options, va_list* arg){
         case 'l':
             number = (long int)va_arg(*arg, long int);
             break;
-        case 'h':
-            number = (short)va_arg(*arg, short);
-            break;        
+        // case 'h':
+        //     number = (short)va_arg(*arg, short);
+        //     break;        
         default:
             number = (int)va_arg(*arg, int);
             break;
@@ -197,7 +235,7 @@ int write_to_string(long int number, Options options, char* string_for_number, s
 
     if( (number == 0 && (options.accuracy || options.width || options.is_blank)) || 
     (number == 0 && !options.accuracy && !options.width && !options.is_blank && !options.is_dot)) {
-        char c = number & options.number_system + '0';
+        char c = number % options.number_system + '0';
         string_for_number[i] = c;
         i++;
         size--;
@@ -205,7 +243,7 @@ int write_to_string(long int number, Options options, char* string_for_number, s
     }
 
     while(number != 0 && string_for_number && size) {
-        char c = number & options.number_system + '0'; //>????
+        char c = number % options.number_system + '0'; //>????
         string_for_number[i] = c;
         i++;
         size--;
@@ -244,6 +282,7 @@ int write_to_string(long int number, Options options, char* string_for_number, s
         i++;
         size--;
     } 
+    //number always zero ?
     if(number > 0 && options.is_plus && size) {
         string_for_number[i] = '+';
         i++;
@@ -398,3 +437,17 @@ char *print_c(char *str, Options options, int symbol){
         }
         return ptr;
     }
+
+
+int main(){
+
+
+
+    char str[10];
+    //printf("%d", s21_sprintf(str,"%123"));
+    s21_sprintf(str,"%c",'a');
+    printf("%s",str);
+
+
+    return 0;
+}
