@@ -1,8 +1,42 @@
-#include "s21_string.h"
 #include <stdarg.h>
 #include <stdio.h>
-#include "s21_sprintf.h"
+#include <stdlib.h>
+#include "s21_string.h"
+
+#define S21_NULL (void *)0
 #define ALPHABET 32 
+typedef unsigned long s21_size_t;
+
+typedef struct 
+{
+    int is_minus;
+    int is_plus;
+    int is_blank;
+    int is_hash;
+    int is_zero;
+    int is_dot;
+    int width;
+    int accuracy;
+    int number_system;
+    char addit_type;    
+    int upper_case;
+    int flag_size;
+} Options;
+
+const char *set_options(Options *options, const char *format, va_list *arg);
+const char *get_options(const char *format, Options *options);
+const char *get_width(const char *format, int *width, va_list *arg);
+Options set_number_system(Options options, char format);
+char *print_u(char *str, Options options, char format, va_list *arg);
+int unsigned_decimal_to_string(char *str_buff,Options options, unsigned long int buff, s21_size_t size_num);
+char *print_c(char *str, Options options, int symbol);
+char* print_decimal(char* str, Options options, va_list* arg);
+s21_size_t get_size(long int number, Options* options);
+int write_to_string(long int number, Options options, char* string_for_number, s21_size_t size);
+char* parser(char* str, char* copy_str, const char *format, Options options, va_list *arg);
+char convert_num_to_char(int num, int upper_case);
+char *print_s(char *str,Options options, va_list *arg);
+Options set_opt_double(Options options, char format);
 
 
 int s21_sprintf(char *str, const char *format, ...){
@@ -182,9 +216,11 @@ char* print_decimal(char* str, Options options, va_list* arg){
 s21_size_t get_size(long int number, Options* options) {
     s21_size_t result = 0;
     long int copy_num = number;
+   // int change_sign = 0;
 
     if(copy_num < 0) {
         copy_num = -number;
+       // change_sign = 1;
     }
     
     while(copy_num > 0) {
@@ -317,7 +353,6 @@ char convert_num_to_char(int num, int upper_case) {
     return flag;
 
 }
-
 
 
 Options set_number_system(Options options, char format){
@@ -453,61 +488,61 @@ char *print_c(char *str, Options options, int symbol){
         return ptr;
     }
 
-char *print_s(char *str, Options options, va_list *arg){
+char *print_s(char *str,Options options, va_list *arg){
     char *ptr = str;
-    char *string = va_arg(*arg,char *);
+    // char *string = va_arg(*arg,char *);
 
-    if(string){
-        int tmp= options.width, i = 0;
+    // if(string){
+    //     int tmp= options.width, i = 0;
 
-        if((s21_size_t)options.width <s21_strlen(string)) options.width = s21_strlen(string);
-        int blank = options.width - s21_strlen(string);
+    //     if((s21_size_t)options.width < s21_strlen(string)) options.width = s21_strlen(string);
+    //     int blank = options.width - s21_strlen(string);
 
-        if(options.accuracy == 0) options.accuracy = options.width;
+    //     if(options.accuracy == 0) options.accuracy = options.width;
 
-        if(options.accuracy != 0 && options.accuracy <tmp)blank = tmp-options.accuracy;
+    //     if(options.accuracy != 0 && options.accuracy <tmp)blank = tmp-options.accuracy;
 
 
-        while(blank && !options.is_minus){
-            *str = ' ';
-            str++;
-            blank--;
-        }
-        while (*string != '\0')
-        {
-            if(!options.accuracy) break;
-            *str = *string;
-            str++;
-            string++;
-            i++;
-            options.accuracy--;
-        }
+    //     while(blank && !options.is_minus){
+    //         *str = ' ';
+    //         str++;
+    //         blank--;
+    //     }
+    //     while (*string != '\0')
+    //     {
+    //         if(!options.accuracy) break;
+    //         *str = *string;
+    //         str++;
+    //         string++;
+    //         i++;
+    //         options.accuracy--;
+    //     }
 
-        while(blank && options.is_minus){
-            *str = ' ';
-            str++;
-            blank--;
-        }
+    //     while(blank && options.is_minus){
+    //         *str = ' ';
+    //         str++;
+    //         blank--;
+    //     }
         
-    } else  {
-        str = s21_memcpy(str,"(null)",6);
-        str +=6;
+    // }else  {
+    //     str = s21_memcpy(str,"(null)",6);
+    //     str+=6;
 
-    }
+    // }
 
-    if(ptr)ptr = str;
+    // if(ptr)ptr = str;
 
 
     return ptr;
 }
 
 
-Options set_opt_double(Options options, char format){
-    if(format == 'g' || format == 'G') options.g = 1;
-    else if(format == 'e' || format =='E') options.e = 1;
-    if(format == 'E' || format == 'G' || format == 'F') options.upper_case =1;
-    return options;
-}
+// Options set_opt_double(Options options, char format){
+//     if(format == 'g' || format == 'G') options.g = 1;
+//     else if(format == 'e' || format =='E') options.e = 1;
+//     if(format == 'E' || format == 'G' || format == 'F') options.upper_case =1;
+//     return options;
+// }
 
 
 // char *print_double(char *str,Options options,char format, va_list *arg){
@@ -519,24 +554,38 @@ Options set_opt_double(Options options, char format){
 //     s21_size_t size_double = get
 // }
 
-long double normalize(long double *num,Options *options){
-    int i = 0;
-    if(fabsl(*num)>1){
-        while (fabsl(*num)>10){
-            *num /= 10;
-            i++;
-            options->e = 2;
-        }
-    }else{
-        while(fabsl(*num)<0.999999){
-            if(*num == 0){
-                options->e = 2;
-                break;
-            }
-            *num *=10;
-            i++;
-            options->e=1;
-        }
-    }
-    return i;
+// long double normalize(long double *num, Options *options){
+//     int i = 0;
+//     if(fabsl(*num)>1){
+//         while (fabsl(*num)>10){
+//             *num /= 10;
+//             i++;
+//             options->e = 2;
+//         }
+//     }else{
+//         while(fabsl(*num)<0.999999){
+//             if(*num == 0){
+//                 options->e = 2;
+//                 break;
+//             }
+//             *num *=10;
+//             i++;
+//             options->e=1;
+//         }
+//     }
+//     return i;
+// }
+
+int main() { 
+    char str[10];
+    printf("my func\n");
+    s21_sprintf(str, "% *d", 7, -543);
+    printf("%s", str);
+
+    printf("\norigin func\n");
+
+    char str2[10];
+    sprintf(str2, "% *d", 7, -543);
+    printf("%s", str2);
+    return 0;
 }
