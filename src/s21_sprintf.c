@@ -1,7 +1,8 @@
+#include "s21_sprintf.h"
 #include "s21_string.h"
 #include <stdarg.h>
 #include <stdio.h>
-#include "s21_sprintf.h"
+#include <stdlib.h>
 #define ALPHABET 32 
 
 
@@ -142,43 +143,6 @@ char* parser(char* str, char* copy_str, const char *format, Options options, va_
 
 
 //decimal
-char* print_decimal(char* str, Options options, va_list* arg){
-    long int number = 0;
-
-    char addit = options.addit_type; 
-    switch(addit) {
-        case 'l':
-            number = (long int)va_arg(*arg, long int);
-            break;
-        // case 'h':
-        //     number = (short)va_arg(*arg, short);
-        //     break;        
-        default:
-            number = (int)va_arg(*arg, int);
-            break;
-    }
-
-    s21_size_t size = get_size(number, &options);
-
-    char* string_for_number = malloc(sizeof(char) * size);
-    if(string_for_number) {
-        int i = write_to_string(number, options, string_for_number, size);
-
-        //reverse 
-        for(int j = i - 1; j >= 0; j--) {
-            *str = string_for_number[j];
-            str++;
-        }
-        while(i < options.width) {
-            *str = ' ';
-            str++;
-        }
-    }
-    if(string_for_number) free(string_for_number);
-    return str;
-    
-}
-
 s21_size_t get_size(long int number, Options* options) {
     s21_size_t result = 0;
     long int copy_num = number;
@@ -285,6 +249,43 @@ int write_to_string(long int number, Options options, char* string_for_number, s
     }
 
     return i;
+}
+
+char* print_decimal(char* str, Options options, va_list* arg){
+    long int number = 0;
+
+    char addit = options.addit_type; 
+    switch(addit) {
+        case 'l':
+            number = (long int)va_arg(*arg, long int);
+            break;
+        // case 'h':
+        //     number = (short)va_arg(*arg, short);
+        //     break;        
+        default:
+            number = (int)va_arg(*arg, int);
+            break;
+    }
+
+    s21_size_t size = get_size(number, &options);
+
+    char* string_for_number = malloc(sizeof(char) * size);
+    if(string_for_number) {
+        int i = write_to_string(number, options, string_for_number, size);
+
+        //reverse 
+        for(int j = i - 1; j >= 0; j--) {
+            *str = string_for_number[j];
+            str++;
+        }
+        while(i < options.width) {
+            *str = ' ';
+            str++;
+        }
+    }
+    if(string_for_number) free(string_for_number);
+    return str;
+    
 }
 
 //decimal
@@ -519,24 +520,24 @@ Options set_opt_double(Options options, char format){
 //     s21_size_t size_double = get
 // }
 
-long double normalize(long double *num,Options *options){
-    int i = 0;
-    if(fabsl(*num)>1){
-        while (fabsl(*num)>10){
-            *num /= 10;
-            i++;
-            options->e = 2;
-        }
-    }else{
-        while(fabsl(*num)<0.999999){
-            if(*num == 0){
-                options->e = 2;
-                break;
-            }
-            *num *=10;
-            i++;
-            options->e=1;
-        }
-    }
-    return i;
-}
+// long double normalize(long double *num,Options *options){
+//     int i = 0;
+//     if(fabsl(*num)>1){
+//         while (fabsl(*num)>10){
+//             *num /= 10;
+//             i++;
+//             options->e = 2;
+//         }
+//     }else{
+//         while(fabsl(*num)<0.999999){
+//             if(*num == 0){
+//                 options->e = 2;
+//                 break;
+//             }
+//             *num *=10;
+//             i++;
+//             options->e=1;
+//         }
+//     }
+//     return i;
+// }
