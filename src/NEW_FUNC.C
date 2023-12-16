@@ -78,6 +78,7 @@ int write_to_string(long int number, Options options, char* string_for_number, s
 
 
 //decimal
+        // char c = convert_num_to_char(number_copy % options.number_system, options.upper_case);
 
 char convert_num_to_char(int num, int upper_case) {
     char flag = '0';

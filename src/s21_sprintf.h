@@ -27,5 +27,7 @@ Options set_number_system(Options options, char format);
 char *print_u(char *str, Options options, char format, va_list *arg);
 int unsigned_decimal_to_string(char *str_buff,Options options, unsigned long int buff, s21_size_t size_num);
 char *print_c(char *str, Options options, int symbol);
+char *print_s(char *str,Options options, va_list *arg);
+Options set_opt_double(Options options, char format);
 
 #endif
