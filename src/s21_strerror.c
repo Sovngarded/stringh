@@ -1,5 +1,5 @@
 #include "s21_string.h"
-#include <string.h>
+// #include <string.h>
 #include <stdio.h>
 
 #if defined(__APPLE__) || defined(__MACH__)
