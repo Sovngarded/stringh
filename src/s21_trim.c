@@ -1,6 +1,7 @@
 #include "s21_string.h"
+#include <stdlib.h>
 
-void *s12_trim(const char *src, const char *trim_chars){
+void *s21_trim(const char *src, const char *trim_chars){
 char* res = S21_NULL;
     if (src && trim_chars) {
         char* ptr_str = (char*)src;
