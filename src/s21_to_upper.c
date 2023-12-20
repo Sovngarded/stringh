@@ -1,4 +1,5 @@
 #include "s21_string.h"
+#include <stdlib.h>
 
 void *s21_to_upper(const char *str){
   char *str_copy = S21_NULL;

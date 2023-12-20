@@ -486,10 +486,9 @@ int main(){
 
 
 
-    char str[10] = "ABCD";
-    //printf("%d", s21_sprintf(str,"%123"));
-    printf("%s",s21_to_lower(str));
-    printf("%s",str);
+    
+    printf("%s",s21_trim(" aaabawdadwadcdaaa "," "));
+    // printf("%s",str);
 
 
     return 0;
