@@ -458,7 +458,7 @@ char* print_u(char *str, Options options, char format, va_list *arg) {
     // else if(format == 'h') number = (short unsigned int)va_arg(*arg, short unsigned int);
     else number = (unsigned int)va_arg(*arg, unsigned int);
 
-    s21_size_t size = get_size_unsigned_decimal(number, options);
+    s21_size_t size = get_size_unsigned_decimal(number, &options);
     char* string_for_number = malloc(sizeof(char)*size);
 
     if(string_for_number){
@@ -559,16 +559,6 @@ Options set_opt_double(Options options, char format){
     if(format == 'E' || format == 'G' || format == 'F') options.upper_case =1;
     return options;
 }
-
-
-// char *print_double(char *str, Options options,char format, va_list *arg){
-//     long double num = 0;
-//     int e = 0;
-//     if(format == "L") num =va_arg(*arg, long double);
-//     else num = va_arg(*arg,double);
-
-//     s21_size_t size_double = get
-// }
 
 long double normalize(long double *num,Options *options){
     int i = 0;

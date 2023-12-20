@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #define ALPHABET 32 
 
 
@@ -126,9 +127,9 @@ char* parser(char* str, char* copy_str, const char *format, Options options, va_
         int symbol = va_arg(*arg, int);
         str = print_c(str, options, symbol);
     } 
-    // else if (*format == 'p') {
-    //     str = print_p(str, &options, arg);
-    // }
+    else if (*format == 'p') {
+        str = print_p(str, &options, arg);
+    }
     else if(*format == 'F' || *format == 'f'){
         options = set_opt_double(options, *format);
         str = print_double(str, options, *(format - 1), arg);
@@ -143,7 +144,8 @@ char* parser(char* str, char* copy_str, const char *format, Options options, va_
     } else if(*format == 'n'){
         int *n = va_arg(*arg,int *);
         *n = (int)(str - copy_str);
-    }
+    } else str = S21_NULL;
+       
     if(!str) *str = '\0';
     return str;
 }
@@ -261,17 +263,9 @@ char* print_decimal(char* str, Options options, va_list* arg){
     long int number = 0;
 
     char addit = options.addit_type; 
-    switch(addit) {
-        case 'l':
-            number = (long int)va_arg(*arg, long int);
-            break;
-        // case 'h':
-        //     number = (short)va_arg(*arg, short);
-        //     break;        
-        default:
-            number = (int)va_arg(*arg, int);
-            break;
-    }
+    if(addit == 'l') number = (long int)va_arg(*arg, long int);
+    else if(addit == 'h') number = (short)va_arg(*arg, short);
+    else number = number = (int)va_arg(*arg, int);
 
     s21_size_t size = get_size_decimal(number, &options);
     char* string_for_number = malloc(sizeof(char) * size);
@@ -476,22 +470,19 @@ char* print_c(char *str, Options options, int symbol){
     ptr = str;
         }
         return ptr;
-    }
+}
 
 char* print_s(char *str, Options options, va_list *arg){
     char *ptr = str;
     char *string = va_arg(*arg,char *);
-
     if(string){
         int tmp= options.width, i = 0;
-
         if((s21_size_t)options.width < s21_strlen(string)) options.width = s21_strlen(string);
         int blank = options.width - s21_strlen(string);
 
         if(options.accuracy == 0) options.accuracy = options.width;
 
         if(options.accuracy != 0 && options.accuracy <tmp)blank = tmp-options.accuracy;
-
 
         while(blank && !options.is_minus){
             *str = ' ';
@@ -507,21 +498,16 @@ char* print_s(char *str, Options options, va_list *arg){
             i++;
             options.accuracy--;
         }
-
         while(blank && options.is_minus){
             *str = ' ';
             str++;
             blank--;
         }
-        
     } else  {
         str = s21_memcpy(str,"(null)",6);
         str +=6;
-
     }
-
     if(ptr)ptr = str;
-
 
     return ptr;
 }
@@ -571,8 +557,61 @@ int double_to_string(long double number, Options options, char* string_for_numbe
             fractional_part *= 10;
             accuracy--;
         }
+
+        if(fmodl(fabsl(fractional_part) * 10, 10.0) > 4) fractional_part = roundl(fractional_part);
+
+        if(options.g) {
+            while ((long)fractional_part % 10 == 0 && options.accuracy > 0 && (long)fractional_part != 0)
+            {
+                fractional_part /= 10;
+                accuracy++;
+            }
+        }
+        int dot = 0;
+        if ((long)fractional_part == 0) dot = 1;
+
+        size = add_s_from_d_to_str(string_for_number, options, accuracy, dot, size, &i, fractional_part, integer_part);
+        
+        if(flag) number = -number; 
+         //handler for flag is zero
+    while(options.is_zero && string_for_number && (size - options.flag_size > 0) && (options.accuracy || flag) ){
+        if(size == 1 && options.flag_size == 1)
+            break;
+        string_for_number[i] = '0';
+        i++;
+        size--;
+        options.accuracy--;
     }
 
+    //handler for flag is blank, plus, minus
+    if(options.is_blank && number >= 0 && size){
+        string_for_number[i] = ' ';
+        i++;
+        size--;
+    }
+
+    if(number < 0 && size) {
+        string_for_number[i] = '-';
+        i++;
+        size--;
+    }
+    if(number > 0 && options.is_plus && size) {
+        string_for_number[i] = '+';
+        i++;
+        size--;
+    }
+
+    //if all flags handled, but we still have free space in the string
+    if(size > 0 && options.is_minus == 0) {
+        while((size - options.flag_size > 0) && string_for_number) {
+            if(options.g && options.width < options.accuracy) break;
+            string_for_number[i] = ' ';
+            i++;
+            size--;
+        }
+    }
+}
+    return i;
 
 }
 
@@ -636,10 +675,15 @@ char* print_eg(char *str, Options options,char format, va_list *arg){
     if(string_for_number) {
         int i = double_to_string(number, options, string_for_number, size, e);
 
-        /////
-        ///
-        //
-        //
+          //reverse 
+        for(int j = i - 1; j >= 0; j--) {
+            *str = string_for_number[j];
+            str++;
+        }
+        while(i < options.width) {
+            *str = ' ';
+            str++;
+        }
     }
 
     if(string_for_number) free(string_for_number);
@@ -699,3 +743,30 @@ int print_e(int e, s21_size_t* size, char* string_for_number, Options options, i
 }
 
 //end e E g G
+
+char* print_p(char* str, Options* options, va_list* arg) {
+    unsigned long int ptr = (unsigned long int)va_arg(*arg, unsigned long int);
+    options->number_system=16;
+    options->is_hash=1;
+    options->upper_case=0;
+
+    s21_size_t size = get_size_unsigned_decimal(ptr, &options);
+    char* string_for_ptr = malloc(sizeof(char)*size);
+
+    if(string_for_ptr){
+        int i  = unsigned_decimal_to_string(string_for_ptr, *options, ptr, size);
+//возмоэно тут что-то другое должно быть ниже...     
+        for(int j = i - 1; j>=0; j--){
+            *str = string_for_ptr[j];
+            str++;
+        }
+        while(i < options->width){
+            *str = ' ';
+            str++;
+        }
+    }//возмоэно тут что-то другое должно быть выще...     
+ 
+    if(string_for_ptr) free(string_for_ptr);
+
+    return str;
+}
