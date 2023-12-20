@@ -161,10 +161,10 @@ int main(){
 //    char s[] = "Hello, world!";
 //   int ch = 'm';
 //   printf("%s",s21_strchr(s,ch));
-    char str[10];
+    char str[10] = "LLOL";
     //printf("%d", s21_sprintf(str,"%123"));
-    s21_sprintf(str,"%123.321");
-    // printf("%d",s21_sprintf(str1))
+    //s21_sprintf(str,"%123.321");
+    printf("%s",str);
 
 //  // Массив со строкой для поиска
 //    char str [24]="test1/test2/test3/test4";

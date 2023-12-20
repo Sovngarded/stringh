@@ -1,8 +1,37 @@
-#include "s21_string.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include "s21_sprintf.h"
 
+#include <stdarg.h>
+#define S21_NULL (void *)0
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct 
+{
+    int is_minus;
+    int is_plus;
+    int is_blank;
+    int is_hash;
+    int is_zero;
+    int is_dot;
+    int width;
+    int accuracy;
+    int number_system;
+    char addit_type;    
+    int upper_case;
+    int flag_size;
+} Options;
+
+typedef unsigned long s21_size_t;
+const char *set_options(Options *options, const char *format, va_list *arg);
+const char *get_options(const char *format, Options *options);
+const char *get_width(const char *format, int *width, va_list *arg);
+Options set_number_system(Options options, char format);
+char *print_u(char *str, Options options, char format, va_list *arg);
+int unsigned_decimal_to_string(char *str_buff,Options options, unsigned long int buff, s21_size_t size_num);
+char *print_c(char *str, Options options, int symbol);
+char* print_decimal(char* str, Options options, va_list* arg);
+s21_size_t get_size(long int number, Options* options);
+int write_to_string(long int number, Options options, char* string_for_number, s21_size_t size);
+char* parser(char* str, char* copy_str, const char *format, Options options, va_list *arg);
 
 
 int s21_sprintf(char *str, const char *format, ...){
@@ -119,16 +148,6 @@ const char *get_width(const char *format, int *width, va_list *arg){
 char* parser(char* str, char* copy_str, const char *format, Options options, va_list *arg) {
     if (*format == 'd' || *format == 'i') {
         str = print_decimal(str, options, arg);
-    }else if(*format == 'c'){
-        int symbol = va_arg(*arg,int);
-        str = print_c(str,options,symbol);
-    }else if(*format == '%'){
-        str = print_c(str,options,'%');
-    }else if(*format == 's'){
-        str = print_s(str,options,arg);
-    }else if(*format == 'n'){
-        int *n = va_arg(*arg,int *);
-        *n = (int)(str - copy_str);
     }
     if(!str) *str = '\0';
     return str;
@@ -176,7 +195,6 @@ char* print_decimal(char* str, Options options, va_list* arg){
 s21_size_t get_size(long int number, Options* options) {
     s21_size_t result = 0;
     int change_sign = 0;
-<<<<<<< HEAD
 
     if(number < 0) {
         number == -number;
@@ -195,26 +213,6 @@ s21_size_t get_size(long int number, Options* options) {
     if((s21_size_t)options->width > result) result = options->width;
     if((s21_size_t)options->accuracy > result) result = options->accuracy;
 
-=======
-
-    if(number < 0) {
-        number == -number;
-        change_sign = 1;
-    }
-    
-    while(number > 0) {
-        number /= 10;
-        result++;
-    }
-
-    if(number == 0 && result == 0 && (options->is_blank && options->width && options->accuracy)) {
-        result++;
-    }
-
-    if((s21_size_t)options->width > result) result = options->width;
-    if((s21_size_t)options->accuracy > result) result = options->accuracy;
-
->>>>>>> lisichka
     if(options->is_blank || options->is_plus || change_sign == 1) {
         options->flag_size = 1;
         result++;
@@ -242,7 +240,6 @@ int write_to_string(long int number, Options options, char* string_for_number, s
         i++;
         size--;
         //number /= 10; //useless move
-<<<<<<< HEAD
     }
 
     while(number != 0 && string_for_number && size) {
@@ -263,28 +260,6 @@ int write_to_string(long int number, Options options, char* string_for_number, s
     if(size == 1 && options.is_zero == 1 && options.flag_size == 1) 
         options.is_zero = 0;
 
-=======
-    }
-
-    while(number != 0 && string_for_number && size) {
-        char c = number % options.number_system + '0'; //>????
-        string_for_number[i] = c;
-        i++;
-        size--;
-        number /= 10;
-    }
-
-    if(change_sign == 1) number = -number;
-
-    if(options.accuracy - i > 0) {
-        options.accuracy -= i;
-        options.is_zero = 1;
-    } else change_sign = 1; //???
-
-    if(size == 1 && options.is_zero == 1 && options.flag_size == 1) 
-        options.is_zero = 0;
-
->>>>>>> lisichka
     //handler for flag is zero
     while(options.is_zero && string_for_number && (size - options.flag_size > 0) && (options.accuracy || change_sign) ){
         if(size == 1 && options.flag_size == 1)
@@ -312,7 +287,6 @@ int write_to_string(long int number, Options options, char* string_for_number, s
         string_for_number[i] = '+';
         i++;
         size--;
-<<<<<<< HEAD
     }
 
     //if all flags handled, but we still have free space in the string
@@ -327,31 +301,10 @@ int write_to_string(long int number, Options options, char* string_for_number, s
     return i;
 }
 
-=======
-    }
-
-    //if all flags handled, but we still have free space in the string
-    if(size > 0 && options.is_minus == 0) {
-        while((size - options.flag_size > 0) && string_for_number) {
-            string_for_number[i] = ' ';
-            i++;
-            size--;
-        }
-    }
-
-    return i;
-}
->>>>>>> lisichka
 
 //decimal
 
-<<<<<<< HEAD
 
-=======
-//decimal
-
-
->>>>>>> lisichka
 Options set_number_system(Options options, char format){
     switch(format){
         case 'o': options.number_system = 8;
@@ -485,93 +438,16 @@ char *print_c(char *str, Options options, int symbol){
         return ptr;
     }
 
-char *print_s(char *str,Options options, va_list *arg){
-    char *ptr = str;
-    char *string = va_arg(*arg,char *);
 
-    if(string){
-        int tmp= options.width, i = 0;
-
-        if((s21_size_t)options.width <s21_strlen(string)) options.width = s21_strlen(string);
-        int blank = options.width - s21_strlen(string);
-
-        if(options.accuracy == 0) options.accuracy = options.width;
-
-        if(options.accuracy != 0 && options.accuracy <tmp)blank = tmp-options.accuracy;
+int main(){
 
 
-        while(blank && !options.is_minus){
-            *str = ' ';
-            str++;
-            blank--;
-        }
-        while (*string != '\0')
-        {
-            if(!options.accuracy) break;
-            *str = *string;
-            str++;
-            string++;
-            i++;
-            options.accuracy--;
-        }
 
-        while(blank && options.is_minus){
-            *str = ' ';
-            str++;
-            blank--;
-        }
-        
-    }else  {
-        str = s21_memcpy(str,"(null)",6);
-        str+=6;
-
-    }
-
-    if(ptr)ptr = str;
+    char str[10];
+    //printf("%d", s21_sprintf(str,"%123"));
+    s21_sprintf(str,"%c",'a');
+    printf("%s",str);
 
 
-    return ptr;
-}
-
-
-Options set_opt_double(Options options, char format){
-    if(format == 'g' || format == 'G') options.g = 1;
-<<<<<<< HEAD
-    else if(format == 'e' || format =='E') options.e = 1;
-    if(format == 'E' || format == 'G' || format == 'F') options.upper_case =1;
-    return options;
-}
-
-
-// char *print_double(char *str,Options options,char format, va_list *arg){
-//     long double num = 0;
-//     int e = 0;
-//     if(format == "L") num =va_arg(*arg,long double);
-//     else num = va_arg(*arg,double);
-
-//     s21_size_t size_double = get
-// }
-
-long double normalize(long double *num,Options *options){
-    int i = 0;
-    if(fabsl(*num)>1){
-        while (fabsl(*num)>10){
-            *num /= 10;
-            i++;
-            options->e = 2;
-        }
-    }else{
-        while(fabsl(*num)<0.999999){
-            if(*num == 0){
-                options->e = 2;
-                break;
-            }
-            *num *=10;
-            i++;
-            options->e=1;
-        }
-    }
-    return i;
-=======
->>>>>>> lisichka
+    return 0;
 }

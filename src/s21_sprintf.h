@@ -29,9 +29,12 @@ int unsigned_decimal_to_string(char *str_buff,Options options, unsigned long int
 char *print_c(char *str, Options options, int symbol);
 char *print_s(char *str,Options options, va_list *arg);
 Options set_opt_double(Options options, char format);
+<<<<<<< HEAD
 char *print_double(char *str,Options options,char format, va_list *arg);
 long double normalize(long double *num,Options *options);
 
 
+=======
+>>>>>>> lisichka
 
 #endif
