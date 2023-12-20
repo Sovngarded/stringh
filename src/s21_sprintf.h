@@ -30,7 +30,7 @@ char *print_u(char *str, Options options, char format, va_list *arg);
 int unsigned_decimal_to_string(char *str_buff,Options options, unsigned long int number, s21_size_t size);
 char* print_decimal(char* str, Options options, va_list* arg);
 s21_size_t get_size_decimal(long int number, Options* options);
-int write_to_string(long int number, Options options, char* string_for_number, s21_size_t size);
+int decimal_to_string(long int number, Options options, char* string_for_number, s21_size_t size);
 char* parser(char* str, char* copy_str, const char *format, Options options, va_list *arg);
 char convert_num_to_char(int num, int upper_case);
 char *print_c(char *str, Options options, int symbol);

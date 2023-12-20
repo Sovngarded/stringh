@@ -121,7 +121,6 @@ char* parser(char* str, char* copy_str, const char *format, Options options, va_
     else if (*format == 'u' || *format == 'o' || *format == 'x' || *format == 'X') {
         options = set_number_system(options, *format);
         str = print_u(str, options, *(format-1), arg);
-        char* print_u(char *str, Options options, char format, va_list *arg)
     }
     else if(*format == 'c'){
         int symbol = va_arg(*arg, int);
@@ -130,6 +129,13 @@ char* parser(char* str, char* copy_str, const char *format, Options options, va_
     // else if (*format == 'p') {
     //     str = print_p(str, &options, arg);
     // }
+    else if(*format == 'F' || *format == 'f'){
+        options = set_opt_double(options, *format);
+        str = print_double(str, options, *(format - 1), arg);
+    }  else if(*format == 'e' || *format == 'E' || *format == 'g' || *format == 'G'){
+        options = set_opt_double(options, *format);
+        str = print_eg(str, options, *(format - 1), arg);
+    } 
     else if(*format == '%'){
         str = print_c(str,options,'%');
     } else if(*format == 's') {
@@ -141,7 +147,6 @@ char* parser(char* str, char* copy_str, const char *format, Options options, va_
     if(!str) *str = '\0';
     return str;
 }
-
 
 //decimal
 s21_size_t get_size_decimal(long int number, Options* options) {
@@ -174,7 +179,7 @@ s21_size_t get_size_decimal(long int number, Options* options) {
     return result;
 }
 
-int write_to_string(long int number, Options options, char* string_for_number, s21_size_t size){
+int decimal_to_string(long int number, Options options, char* string_for_number, s21_size_t size){
     int change_sign = 0;
 
     if(number < 0) {
@@ -272,7 +277,7 @@ char* print_decimal(char* str, Options options, va_list* arg){
     char* string_for_number = malloc(sizeof(char) * size);
 
     if(string_for_number) {
-        int i = write_to_string(number, options, string_for_number, size);
+        int i = decimal_to_string(number, options, string_for_number, size);
 
         //reverse 
         for(int j = i - 1; j >= 0; j--) {
@@ -342,7 +347,7 @@ Options set_number_system(Options options, char format){
 s21_size_t get_size_unsigned_decimal(unsigned long int number, Options* options) {
 }
 
-int unsigned_decimal_to_string(char *str_buff,Options options, unsigned long int number, s21_size_t size){
+int unsigned_decimal_to_string(char *string_for_number, Options options, unsigned long int number, s21_size_t size){
     int change_sign = 0;
 
     if((options.is_hash && options.number_system == 8)) options.flag_size = 1;
@@ -434,7 +439,7 @@ char* print_u(char *str, Options options, char format, va_list *arg) {
         int i  = unsigned_decimal_to_string(string_for_number, options, number, size);
         
         for(int j = i - 1; j>=0; j--){
-            *str = string_for_number([j]);
+            *str = string_for_number[j];
             str++;
         }
         while(i < options.width){
@@ -480,7 +485,7 @@ char* print_s(char *str, Options options, va_list *arg){
     if(string){
         int tmp= options.width, i = 0;
 
-        if((s21_size_t)options.width <s21_strlen(string)) options.width = s21_strlen(string);
+        if((s21_size_t)options.width < s21_strlen(string)) options.width = s21_strlen(string);
         int blank = options.width - s21_strlen(string);
 
         if(options.accuracy == 0) options.accuracy = options.width;
@@ -521,7 +526,7 @@ char* print_s(char *str, Options options, va_list *arg){
     return ptr;
 }
 
-
+//double f F
 Options set_opt_double(Options options, char format){
     if(format == 'g' || format == 'G') options.g = 1;
     else if(format == 'e' || format =='E') options.e = 1;
@@ -529,17 +534,131 @@ Options set_opt_double(Options options, char format){
     return options;
 }
 
+s21_size_t get_size_double(Options* options, long double number) {
+    //разбиваем на две части (целая6 дробная) + место под точку
+    //если асс или видтх больше6 то добавляем
+}
 
-// char *print_double(char *str,Options options,char format, va_list *arg){
-//     long double num = 0;
-//     int e = 0;
-//     if(format == "L") num =va_arg(*arg,long double);
-//     else num = va_arg(*arg,double);
+int double_to_string(long double number, Options options, char* string_for_number, s21_size_t size, int e) {
+    int i = is_nan_of_inf(string_for_number, number, options);
+    if(!i) {
+        if(options.e) print_e(e, &size, string_for_number, options, &i);
+        int flag = 0;
+        if(number < 0) {
+            flag = 1;
+            number = -number;
+        }
 
-//     s21_size_t size_double = get
-// }
+        long double integer_part  = 0;
+        long double fractional_part = modfl(number, &integer_part);
 
-long double normalize(long double *num,Options *options){
+        int accuracy = options.accuracy;
+        long double copy_fractional_part = fractional_part;
+
+        if(fractional_part + 0.000000000000001 >= 1) {
+            fractional_part = 0;
+            integer_part += 1;
+        }
+
+        for(int i = 0; i < 15; i++) {
+            copy_fractional_part *= 10;
+            if ((long)copy_fractional_part != 0) break;
+        }
+
+        if((long)copy_fractional_part == 0 && options.g) accuracy = 0;
+        if(!accuracy && fractional_part * 10 > 4) integer_part += 1;
+        while(accuracy > 0){
+            fractional_part *= 10;
+            accuracy--;
+        }
+    }
+
+
+}
+
+char *print_double(char *str, Options options,char format, va_list *arg){
+    long double number = 0;
+    int e = 0;
+    if(format == "L") number =va_arg(*arg,long double);
+    else number = va_arg(*arg,double);
+
+    s21_size_t size = get_size_double(&options, number);
+    char* string_for_number = malloc(sizeof(char) * size);
+
+    if(string_for_number) {
+        int i = double_to_string(number, options, string_for_number, size, e);
+
+        //reverse 
+        for(int j = i - 1; j >= 0; j--) {
+            *str = string_for_number[j];
+            str++;
+        }
+        while(i < options.width) {
+            *str = ' ';
+            str++;
+        }
+    }
+    if(string_for_number) free(string_for_number);
+ 
+    return str;
+
+}
+//end double f F
+
+//e E g G
+s21_size_t get_size_eg(Options* options, long double number) {
+    //разбиваем на две части (целая6 дробная) + место под точку
+    //место под е и + под 0n 
+    //если асс или видтх больше6 то добавляем
+}
+
+char* print_eg(char *str, Options options,char format, va_list *arg){
+    long double number = 0;
+    int e = 0;
+    if(format == "L") number =va_arg(*arg,long double);
+    else number = va_arg(*arg,double);
+
+    s21_size_t size = 0;
+    if(options.g) {
+        options = shrtst(options, number);
+    }
+    if (options.e) {
+        e = normalize(&number, &options);
+        if(e < 100) size+= 2;
+        else size += 3;
+    }
+
+    size += get_size_eg(&options, number);
+    if ((int)size < options.accuracy) size = options.accuracy;
+    if ((int)size < options.width) size = options.width;
+    char* string_for_number = malloc(sizeof(char) * size);
+
+    if(string_for_number) {
+        int i = double_to_string(number, options, string_for_number, size, e);
+
+        /////
+        ///
+        //
+        //
+    }
+
+    if(string_for_number) free(string_for_number);
+ 
+    return str;
+}
+
+Options shrtst(Options options, long double number) {
+    Options copy_opt = options;
+    long double copy_number = number;
+    int e = normalize(&copy_number, &copy_opt);
+    if(copy_opt.accuracy == 0 && !copy_opt.is_dot) copy_opt.accuracy = 6;
+    if((e <= 4 && copy_opt.e == 1) || (copy_opt.e == 2 && e < 6) ) {
+        copy_opt.e = 0;
+    }
+    return copy_opt;
+} 
+
+long double normalize(long double *num,Options *options) {
     int i = 0;
     if(fabsl(*num)>1){
         while (fabsl(*num)>10){
@@ -560,3 +679,23 @@ long double normalize(long double *num,Options *options){
     }
     return i;
 }
+
+int print_e(int e, s21_size_t* size, char* string_for_number, Options options, int *i){
+    int copy_e = e;
+    if (copy_e == 0) {
+        *size -= add_to(string_for_number + *i, i, convert_num_to_char(copy_e % options.number_system, options.upper_case));
+    }
+    while(copy_e) {
+        *size -= add_to(string_for_number + *i, i, convert_num_to_char(copy_e % options.number_system, options.upper_case));
+        copy_e /= 10;
+    }
+    if(e < 10) *size -= add_to(string_for_number + *i, i, '0');
+    if(options.e == 2 || e == 0) *size -= add_to(string_for_number + *i, i, '+');
+    else *size -= add_to(string_for_number + *i, i, '-');
+    if(options.upper_case) *size -= add_to(string_for_number + *i, i, 'E');
+    else *size -= add_to(string_for_number + *i, i, 'e');
+
+    return 0;
+}
+
+//end e E g G
