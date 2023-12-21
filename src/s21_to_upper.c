@@ -1,7 +1,7 @@
 #include "s21_string.h"
 #include <stdlib.h>
 
-void *s21_to_upper(const char *str){
+void *s21_to_upper(const char *str) {
   char *str_copy = S21_NULL;
   if (str != S21_NULL) {
     int len = s21_strlen(str);
@@ -18,9 +18,4 @@ void *s21_to_upper(const char *str){
     }
   }
   return str_copy;
-
-
-
-
-
 }

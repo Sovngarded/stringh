@@ -2,9 +2,8 @@
 
 #include <stdlib.h>
 
-
-void *s21_to_lower(const char *str){
-    char *str_copy = S21_NULL;
+void *s21_to_lower(const char *str) {
+  char *str_copy = S21_NULL;
   if (str != S21_NULL) {
     int len = s21_strlen(str);
     str_copy = malloc(sizeof(char) * (len + 1));
@@ -20,6 +19,4 @@ void *s21_to_lower(const char *str){
     }
   }
   return str_copy;
-
-
 }

@@ -48,4 +48,4 @@ clean:
 	rm -rf *.css
 	rm -rf test
 	rm -rf gcov_test
-	rm -rf test report
+	rm -rf test repor

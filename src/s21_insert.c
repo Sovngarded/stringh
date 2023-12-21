@@ -1,8 +1,8 @@
 #include "s21_string.h"
 #include <stdlib.h>
 
-void *s21_insert(const char *src, const char *str, s21_size_t start_index){
-char *new_str = S21_NULL;
+void *s21_insert(const char *src, const char *str, s21_size_t start_index) {
+  char *new_str = S21_NULL;
   if (src && str) {
     s21_size_t src_len = s21_strlen(src);
     s21_size_t str_len = s21_strlen(str);

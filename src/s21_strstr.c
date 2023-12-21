@@ -1,20 +1,20 @@
 #include "s21_string.h"
 
 char *s21_strstr(const char *haystack, const char *needle) {
-    if (*needle == '\0') {
-        return (char*)haystack;
+  if (*needle == '\0') {
+    return (char *)haystack;
+  }
+  while (*haystack) {
+    const char *h = haystack;
+    const char *n = needle;
+    while (*h && *n && (*h == *n)) {
+      h++;
+      n++;
     }
-    while (*haystack) {
-        const char* h = haystack;
-        const char* n = needle;
-        while (*h && *n && (*h == *n)) {
-            h++;
-            n++;
-        }
-        if (*n == '\0') {
-            return (char*)haystack;
-        }
-        haystack++;
+    if (*n == '\0') {
+      return (char *)haystack;
     }
-    return S21_NULL;
+    haystack++;
+  }
+  return S21_NULL;
 }

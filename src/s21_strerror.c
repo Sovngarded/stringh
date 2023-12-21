@@ -1,7 +1,7 @@
-#include "s21_string.h"
 #include "s21_sprintf.h"
-#include <string.h>
+#include "s21_string.h"
 #include <stdio.h>
+#include <string.h>
 
 #if defined(__APPLE__) || defined(__MACH__)
 #define S21_ERRLIST_SIZE 107
@@ -261,13 +261,13 @@ static const char *const s21_sys_errlist[S21_ERRLIST_SIZE] = {
 };
 #endif
 
-char* s21_strerror(int errnum) {
-    static char res[256] = {'\0'};
+char *s21_strerror(int errnum) {
+  static char res[256] = {'\0'};
 
-    if (errnum < 0 || errnum >= S21_ERRLIST_SIZE)
-        s21_sprintf(res, "Unknown error: %d", errnum);
-    else
-        strcpy(res, s21_sys_errlist[errnum]);
+  if (errnum < 0 || errnum >= S21_ERRLIST_SIZE)
+    s21_sprintf(res, "Unknown error: %d", errnum);
+  else
+    strcpy(res, s21_sys_errlist[errnum]);
 
-    return res;
+  return res;
 }
