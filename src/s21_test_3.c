@@ -3,6 +3,7 @@
 #define S21_NULL (void *)0
 #include <stdio.h>
 #include <stdlib.h>
+#include "s21_string.h"
 
 typedef struct 
 {
@@ -33,6 +34,48 @@ s21_size_t get_size(long int number, Options* options);
 int write_to_string(long int number, Options options, char* string_for_number, s21_size_t size);
 char* parser(char* str, char* copy_str, const char *format, Options options, va_list *arg);
 
+
+
+s21_size_t s21_strlen(const char *str){
+    s21_size_t length = -1;
+    if(str!= S21_NULL){
+        length = 0;
+        while (str[length] != '\0') {
+        length++;
+    }
+
+    }
+
+
+
+    return length;
+}
+
+
+// void *s21_to_upper(const char *str){
+    
+
+// char *str_copy = NULL;
+//   if (str != NULL) {
+//     int len = s21_strlen(str);
+//     str_copy = malloc(sizeof(char) * (len + 1));
+//     if (str_copy) {
+//       for (int i = 0; i <= len; i++) {
+//         if (str[i] >= 'a' && str[i] <= 'z') {
+//           str_copy[i] = (str[i] - 'a') + 'A';
+//         } else {
+//           str_copy[i] = str[i];
+//         }
+//       }
+//       str_copy[len] = '\0';
+//     }
+//   }
+//   return str_copy;
+
+
+
+
+// }
 
 int s21_sprintf(char *str, const char *format, ...){
     char *copy_str = str;
@@ -439,10 +482,14 @@ char *print_c(char *str, Options options, int symbol){
     }
 
 
-int main() { 
-    char str[10];
-    printf("heelo\n");
-    s21_sprintf(str, "%d", 543);
-    printf("%s", str);
+int main(){
+
+
+
+    
+    printf("%s",s21_trim(" aaabawdadwadcdaaa "," "));
+    // printf("%s",str);
+
+
     return 0;
 }

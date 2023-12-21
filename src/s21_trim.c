@@ -1,0 +1,33 @@
+#include "s21_string.h"
+#include <stdlib.h>
+
+void *s21_trim(const char *src, const char *trim_chars){
+char* res = S21_NULL;
+    if (src != S21_NULL) {
+
+
+        if( trim_chars == S21_NULL){
+            
+            s21_strcpy(res,src);
+        }else{
+
+
+
+
+
+        char* ptr_str = (char*)src;
+        char* end_str = (char*)src + s21_strlen(src);
+        for (; *ptr_str && s21_strchr(trim_chars, *ptr_str); ptr_str++) ;
+        for (; end_str != ptr_str && s21_strchr(trim_chars, *(end_str - 1)); end_str--) ;
+        res = (char*)malloc((end_str - ptr_str + 1) * sizeof(char));
+        if (res) {
+            s21_strncpy(res, ptr_str, end_str - ptr_str);
+            *(res + (end_str - ptr_str)) = '\0';
+        }
+    }
+    }
+    return res;
+
+
+
+}

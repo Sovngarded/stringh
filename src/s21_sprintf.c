@@ -15,7 +15,7 @@ int s21_sprintf(char *str, const char *format, ...){
     va_start(arg, format);
 
     while(*format){
-        if(*format == '%') {
+        if(*format == '%')  {
             format++;
             Options options = {0};
             options.number_system = 10;
