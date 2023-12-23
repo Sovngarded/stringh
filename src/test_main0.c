@@ -1,6 +1,6 @@
+#include <math.h>
 #include "s21_sprintf.h"
 #include "s21_string.h"
-#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,7 +11,7 @@ typedef unsigned long s21_size_t;
 
 int s21_sprintf(char *str, const char *format, ...) {
   char *copy_str = str;
-  // char flags[] = "cdieEfgGosuxXpn%"; //F?
+  char flags[] = "cdieEfgGosuxXpn%"; //F?
 
   va_list arg;
   va_start(arg, format);
@@ -24,7 +24,7 @@ int s21_sprintf(char *str, const char *format, ...) {
       format = set_options(&options, format, &arg);
       str = parser(str, copy_str, format, options, &arg);
     } else {
-      *str = *format;
+      *str = *format; 
       str++;
     }
     format++;
@@ -308,8 +308,8 @@ char *print_decimal(char *str, Options options, va_list *arg) {
   char addit = options.addit_type;
   if (addit == 'l')
     number = (long int)va_arg(*arg, long int);
-  else if (addit == 'h')
-    number = (short)va_arg(*arg, short);
+  // else if (addit == 'h')
+    // number = (short)va_arg(*arg, short);
   else
     number = (int)va_arg(*arg, int);
 
@@ -319,15 +319,17 @@ char *print_decimal(char *str, Options options, va_list *arg) {
   if (string_for_number) {
     int i = decimal_to_string(number, options, string_for_number, size);
 
+
     // reverse
-    for (int j = i - 1; j >= 0; j--) {
-      *str = string_for_number[j];
-      str++;
-    }
-    while (i < options.width) {
-      *str = ' ';
-      str++;
-    }
+    str = reverse_and_pad(str, string_for_number, i, options.width);
+    // for (int j = i - 1; j >= 0; j--) {
+    //   *str = string_for_number[j];
+    //   str++;
+    // }
+    // while (i < options.width) {
+    //   *str = ' ';
+    //   str++;
+    // }
   }
   if (string_for_number)
     free(string_for_number);
@@ -365,7 +367,7 @@ char convert_num_to_char(int num, int upper_case) {
   return flag;
 }
 
-void reverse_and_pad(char *str, const char *string_for_number, int length, int width) {
+char* reverse_and_pad(char *str, const char *string_for_number, int length, int width) {
   for (int j = length - 1; j >= 0; j--) {
     *str = string_for_number[j];
     str++;
@@ -376,6 +378,7 @@ void reverse_and_pad(char *str, const char *string_for_number, int length, int w
     str++;
     // length++;
   }
+  return str;
 }
 
 // unsingned + x, o,
@@ -452,8 +455,8 @@ char *print_u(char *str, Options options, char format, va_list *arg) {
   unsigned long int number = 0;
   if (format == 'l')
     number = (unsigned long int)va_arg(*arg, unsigned long int);
-  else if (format == 'h')
-    number = (unsigned short)va_arg(*arg, unsigned short);
+  // else if (format == 'h')
+    // number = (unsigned short)va_arg(*arg, unsigned short);
   else
     number = (unsigned int)va_arg(*arg, unsigned int);
 
@@ -463,14 +466,16 @@ char *print_u(char *str, Options options, char format, va_list *arg) {
   if (string_for_number) {
     int i = unsigned_decimal_to_string(string_for_number, options, number, size);
 
-    for (int j = i - 1; j >= 0; j--) {
-      *str = string_for_number[j];
-      str++;
-    }
-    while (i < options.width) {
-      *str = ' ';
-      str++;
-    }
+    str = reverse_and_pad(str, string_for_number, i, options.width);
+
+    // for (int j = i - 1; j >= 0; j--) {
+    //   *str = string_for_number[j];
+    //   str++;
+    // }
+    // while (i < options.width) {
+    //   *str = ' ';
+    //   str++;
+    // }
   }
 
   if (string_for_number)
@@ -509,9 +514,9 @@ char *print_s(char *str, Options options, va_list *arg) {
   char *string = va_arg(*arg, char *);
   if (string) {
     int tmp = options.width, i = 0;
-    if ((s21_size_t)options.width < s21_strlen(string))
-      options.width = s21_strlen(string);
-    int blank = options.width - s21_strlen(string);
+    // if ((s21_size_t)options.width < s21_strlen(string))
+    //   options.width = s21_strlen(string);
+    int blank = options.width; // - s21_strlen(string);
 
     if (options.accuracy == 0)
       options.accuracy = options.width;
@@ -539,7 +544,7 @@ char *print_s(char *str, Options options, va_list *arg) {
       blank--;
     }
   } else {
-    str = s21_memcpy(str, "(null)", 6);
+    //str = s21_memcpy(str, "(null)", 6);
     str += 6;
   }
   if (ptr)
@@ -573,26 +578,26 @@ int print_e(int e, s21_size_t *size, char *string_for_number, Options options,
             int *i) {
   int copy_e = e;
   if (copy_e == 0) {
-    *size -= add_to(string_for_number + *i, i,
-                    convert_num_to_char(copy_e % options.number_system,
-                                        options.upper_case));
+    // *size -= add_to(string_for_number + *i, i,
+    //                 convert_num_to_char(copy_e % options.number_system,
+    //                                     options.upper_case));
   }
   while (copy_e) {
-    *size -= add_to(string_for_number + *i, i,
-                    convert_num_to_char(copy_e % options.number_system,
-                                        options.upper_case));
+    // *size -= add_to(string_for_number + *i, i,
+    //                 convert_num_to_char(copy_e % options.number_system,
+    //                                     options.upper_case));
     copy_e /= 10;
   }
-  if (e < 10)
-    *size -= add_to(string_for_number + *i, i, '0');
-  if (options.e == 2 || e == 0)
-    *size -= add_to(string_for_number + *i, i, '+');
-  else
-    *size -= add_to(string_for_number + *i, i, '-');
-  if (options.upper_case)
-    *size -= add_to(string_for_number + *i, i, 'E');
-  else
-    *size -= add_to(string_for_number + *i, i, 'e');
+  // if (e < 10)
+  //   *size -= add_to(string_for_number + *i, i, '0');
+  // if (options.e == 2 || e == 0)
+  //   *size -= add_to(string_for_number + *i, i, '+');
+  // else
+  //   *size -= add_to(string_for_number + *i, i, '-');
+  // if (options.upper_case)
+  //   *size -= add_to(string_for_number + *i, i, 'E');
+  // else
+  //   *size -= add_to(string_for_number + *i, i, 'e');
 
   return 0;
 }
@@ -666,8 +671,8 @@ s21_size_t add_parts_to_string(char *string, Options options, int accuracy,
     accuracy--;
   }
 
-  if (fmodl(fabsl(fractional_part) * 10, 10.0) > 4)
-    fractional_part = roundl(fractional_part);
+  // if (fmodl(fabsl(fractional_part) * 10, 10.0) > 4)
+    // fractional_part = roundl(fractional_part);
 
   if (options.g) {
     while ((long)fractional_part % 10 == 0 && options.accuracy > 0 &&
@@ -681,8 +686,9 @@ s21_size_t add_parts_to_string(char *string, Options options, int accuracy,
   if ((long)fractional_part == 0)
     dot = 1;
 
-  return add_s_from_d_to_str(string, options, accuracy, dot, size, i,
-                             fractional_part, integer_part);
+  return 0;
+  // return add_s_from_d_to_str(string, options, accuracy, dot, size, i,
+  //                            fractional_part, integer_part);
 }
 
 int double_handle_flags(char *string_for_number, Options options,
@@ -728,7 +734,8 @@ int double_handle_flags(char *string_for_number, Options options,
 
 int double_to_string(long double number, Options options,
                      char *string_for_number, s21_size_t size, int e) {
-  int i = is_nan_of_inf(string_for_number, number, options);
+  int i = 0;
+  // int i = is_nan_of_inf(string_for_number, number, options);
   if (!i) {
     if (options.e)
       print_e(e, &size, string_for_number, options, &i);
@@ -771,14 +778,15 @@ char *print_double(char *str, Options options, char format, va_list *arg) {
     int i = double_to_string(number, options, string_for_number, size, e);
 
     // reverse
-    for (int j = i - 1; j >= 0; j--) {
-      *str = string_for_number[j];
-      str++;
-    }
-    while (i < options.width) {
-      *str = ' ';
-      str++;
-    }
+    str = reverse_and_pad(str, string_for_number, i, options.width);
+    // for (int j = i - 1; j >= 0; j--) {
+    //   *str = string_for_number[j];
+    //   str++;
+    // }
+    // while (i < options.width) {
+    //   *str = ' ';
+    //   str++;
+    // }
   }
   if (string_for_number)
     free(string_for_number);
@@ -829,14 +837,15 @@ char *print_eg(char *str, Options options, char format, va_list *arg) {
     int i = double_to_string(number, options, string_for_number, size, e);
 
     // reverse
-    for (int j = i - 1; j >= 0; j--) {
-      *str = string_for_number[j];
-      str++;
-    }
-    while (i < options.width) {
-      *str = ' ';
-      str++;
-    }
+    str = reverse_and_pad(str, string_for_number, i, options.width);
+    // for (int j = i - 1; j >= 0; j--) {
+    //   *str = string_for_number[j];
+    //   str++;
+    // }
+    // while (i < options.width) {
+    //   *str = ' ';
+    //   str++;
+    // }
   }
 
   if (string_for_number)
@@ -893,14 +902,15 @@ char *print_p(char *str, Options *options, va_list *arg) {
   if (string_for_ptr) {
     int i = unsigned_decimal_to_string(string_for_ptr, *options, ptr, size);
     //возмоэно тут что-то другое должно быть ниже...
-    for (int j = i - 1; j >= 0; j--) {
-      *str = string_for_ptr[j];
-      str++;
-    }
-    while (i < options->width) {
-      *str = ' ';
-      str++;
-    }
+    str = reverse_and_pad(str, string_for_number, i, options->width);
+    // for (int j = i - 1; j >= 0; j--) {
+    //   *str = string_for_ptr[j];
+    //   str++;
+    // }
+    // while (i < options->width) {
+    //   *str = ' ';
+    //   str++;
+    // }
   } //возмоэно тут что-то другое должно быть выще...
 
   if (string_for_ptr)
@@ -912,13 +922,13 @@ char *print_p(char *str, Options *options, va_list *arg) {
 int main() {
   char str[10];
   printf("my func\n");
-  s21_sprintf(str, "%p", &str);
+  s21_sprintf(str, "% + d", 4342);
   printf("%s", str);
 
   printf("\norigin func\n");
 
   char str2[10];
-  sprintf(str2, "%p", &str);
+  sprintf(str2, "% + d", 4342);
   printf("%s", str2);
   return 0;
 }

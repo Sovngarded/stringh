@@ -29,6 +29,9 @@ test: $(TARGET)
 	./s21_string
 	@echo "----------------------------------------------------------------------"
 
+run:
+	gcc -g test_main0.c
+
 gcov_report: test 
 	lcov -t "test" -o test.info -c -d .	
 	genhtml -o report test.info

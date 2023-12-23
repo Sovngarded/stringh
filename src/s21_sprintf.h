@@ -2,6 +2,7 @@
 #define S21_SPRINTF_H
 #include <stdarg.h>
 #include "s21_string.h"
+#include <math.h>
 
 typedef struct 
 {
@@ -29,13 +30,12 @@ char* parser(char* str, char* copy_str, const char *format, Options options, va_
 
 char* print_p(char* str, Options* options, va_list* arg);
 
-void reverse_and_pad(char *str, const char *string_for_number, int length, int width);
-
 char* print_decimal(char* str, Options options, va_list* arg);
 s21_size_t get_size_decimal(long int number, Options* options);
 int decimal_handle_flags(char* string_for_number, Options options, s21_size_t size, int i, long int number, char data_type);
 int decimal_to_string(long int number, Options options, char* string_for_number, s21_size_t size);
 char convert_num_to_char(int num, int upper_case);
+char* reverse_and_pad(char *str, const char *string_for_number, int length, int width);
 
 Options set_number_system(Options options, char format);
 s21_size_t get_size_unsigned_decimal(unsigned long int number, Options* options);
