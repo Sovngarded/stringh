@@ -319,17 +319,8 @@ char *print_decimal(char *str, Options options, va_list *arg) {
   if (string_for_number) {
     int i = decimal_to_string(number, options, string_for_number, size);
 
-
     // reverse
     str = reverse_and_pad(str, string_for_number, i, options.width);
-    // for (int j = i - 1; j >= 0; j--) {
-    //   *str = string_for_number[j];
-    //   str++;
-    // }
-    // while (i < options.width) {
-    //   *str = ' ';
-    //   str++;
-    // }
   }
   if (string_for_number)
     free(string_for_number);
@@ -376,7 +367,6 @@ char* reverse_and_pad(char *str, const char *string_for_number, int length, int 
   while (length < width) {
     *str = ' ';
     str++;
-    // length++;
   }
   return str;
 }
@@ -467,15 +457,6 @@ char *print_u(char *str, Options options, char format, va_list *arg) {
     int i = unsigned_decimal_to_string(string_for_number, options, number, size);
 
     str = reverse_and_pad(str, string_for_number, i, options.width);
-
-    // for (int j = i - 1; j >= 0; j--) {
-    //   *str = string_for_number[j];
-    //   str++;
-    // }
-    // while (i < options.width) {
-    //   *str = ' ';
-    //   str++;
-    // }
   }
 
   if (string_for_number)
@@ -514,9 +495,9 @@ char *print_s(char *str, Options options, va_list *arg) {
   char *string = va_arg(*arg, char *);
   if (string) {
     int tmp = options.width, i = 0;
-    // if ((s21_size_t)options.width < s21_strlen(string))
-    //   options.width = s21_strlen(string);
-    int blank = options.width; // - s21_strlen(string);
+    if ((s21_size_t)options.width < s21_strlen(string))
+      options.width = s21_strlen(string);
+    int blank = options.width - s21_strlen(string);
 
     if (options.accuracy == 0)
       options.accuracy = options.width;
@@ -544,7 +525,7 @@ char *print_s(char *str, Options options, va_list *arg) {
       blank--;
     }
   } else {
-    //str = s21_memcpy(str, "(null)", 6);
+    str = s21_memcpy(str, "(null)", 6);
     str += 6;
   }
   if (ptr)
@@ -779,14 +760,6 @@ char *print_double(char *str, Options options, char format, va_list *arg) {
 
     // reverse
     str = reverse_and_pad(str, string_for_number, i, options.width);
-    // for (int j = i - 1; j >= 0; j--) {
-    //   *str = string_for_number[j];
-    //   str++;
-    // }
-    // while (i < options.width) {
-    //   *str = ' ';
-    //   str++;
-    // }
   }
   if (string_for_number)
     free(string_for_number);
@@ -838,14 +811,6 @@ char *print_eg(char *str, Options options, char format, va_list *arg) {
 
     // reverse
     str = reverse_and_pad(str, string_for_number, i, options.width);
-    // for (int j = i - 1; j >= 0; j--) {
-    //   *str = string_for_number[j];
-    //   str++;
-    // }
-    // while (i < options.width) {
-    //   *str = ' ';
-    //   str++;
-    // }
   }
 
   if (string_for_number)
@@ -902,15 +867,7 @@ char *print_p(char *str, Options *options, va_list *arg) {
   if (string_for_ptr) {
     int i = unsigned_decimal_to_string(string_for_ptr, *options, ptr, size);
     //возмоэно тут что-то другое должно быть ниже...
-    str = reverse_and_pad(str, string_for_number, i, options->width);
-    // for (int j = i - 1; j >= 0; j--) {
-    //   *str = string_for_ptr[j];
-    //   str++;
-    // }
-    // while (i < options->width) {
-    //   *str = ' ';
-    //   str++;
-    // }
+    str = reverse_and_pad(str, string_for_ptr, i, options->width);
   } //возмоэно тут что-то другое должно быть выще...
 
   if (string_for_ptr)
@@ -922,13 +879,13 @@ char *print_p(char *str, Options *options, va_list *arg) {
 int main() {
   char str[10];
   printf("my func\n");
-  s21_sprintf(str, "% + d", 4342);
+  s21_sprintf(str, "%");
   printf("%s", str);
 
   printf("\norigin func\n");
 
   char str2[10];
-  sprintf(str2, "% + d", 4342);
+  sprintf(str2, "%");
   printf("%s", str2);
   return 0;
 }
