@@ -2,7 +2,7 @@
 
 char *s21_strtok(char *str, const char *delim) {
   static char *last_token = S21_NULL;
-  char *token_start;
+  char *token_start = S21_NULL;
 
   if (str != S21_NULL) {
     last_token = str;

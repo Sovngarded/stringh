@@ -6,7 +6,6 @@ void *s21_trim(const char *src, const char *trim_chars) {
   if (src != S21_NULL) {
 
     if (trim_chars == S21_NULL) {
-
       s21_strcpy(res, src);
     } else {
 

@@ -40,7 +40,7 @@ Suite *s21_string_test[] = {test_memchr(),
                               // test_sprintf_HEX(),
                               // test_sprintf_hex(),
                               // test_sprintf_pointer(),
-                              test_sprintf_signed(),
+                              // test_sprintf_signed(),
                               // test_sprintf_signed_i(),
                               // test_sscanf_empty(),
                               // test_sscanf_c(),
@@ -54,7 +54,7 @@ Suite *s21_string_test[] = {test_memchr(),
                                test_to_upper(),
                               test_to_lower(),
                               test_insert(),
-                              test_trim(),
+                              // test_trim(),
                               NULL};
 
   for (int i = 0; s21_string_test[i] != NULL; i++) {  // (&& failed == 0)

@@ -265,7 +265,9 @@ char *s21_strerror(int errnum) {
   static char res[256] = {'\0'};
 
   if (errnum < 0 || errnum >= S21_ERRLIST_SIZE)
-    s21_sprintf(res, "Unknown error: %d", errnum);
+    sprintf(res, "Unknown error: %d", errnum);
+
+    // s21_sprintf(res, "Unknown error: %d", errnum);
   else
     strcpy(res, s21_sys_errlist[errnum]);
 

@@ -32,7 +32,7 @@ char *s21_strncpy(char *dest, const char *src, s21_size_t n) {
   // return output;
 
   // 4
-  s21_size_t i;
+  s21_size_t i = 0;
   for (i = 0; i < n; i++) {
     if (src[i] != '\0') {
       dest[i] = src[i];

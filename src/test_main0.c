@@ -308,8 +308,8 @@ char *print_decimal(char *str, Options options, va_list *arg) {
   char addit = options.addit_type;
   if (addit == 'l')
     number = (long int)va_arg(*arg, long int);
-  // else if (addit == 'h')
-    // number = (short)va_arg(*arg, short);
+  else if (addit == 'h')
+    number = (short)va_arg(*arg, int);
   else
     number = (int)va_arg(*arg, int);
 
@@ -318,7 +318,6 @@ char *print_decimal(char *str, Options options, va_list *arg) {
 
   if (string_for_number) {
     int i = decimal_to_string(number, options, string_for_number, size);
-
     // reverse
     str = reverse_and_pad(str, string_for_number, i, options.width);
   }
@@ -393,10 +392,29 @@ Options set_number_system(Options options, char format) {
 
 s21_size_t get_size_unsigned_decimal(unsigned long int number,
                                      Options *options) {
-  ///
-  number = options->accuracy;
-  number--;
-  return 0;
+  s21_size_t result = 0;
+  unsigned long int copy_num = number;
+
+  while (copy_num > 0) {
+    copy_num /= 10;
+    result++;
+  }
+
+  if (copy_num == 0 && result == 0 &&
+      (options->is_blank && options->width && options->accuracy)) {
+    result++;
+  }
+
+  if ((s21_size_t)options->width > result)
+    result = options->width;
+  if ((s21_size_t)options->accuracy > result)
+    result = options->accuracy;
+
+  if (result == 0 && copy_num == 0 && !options->width && !options->accuracy &&
+      !options->is_blank && !options->is_dot)
+    result++;
+
+  return result;
 }
 
 int unsigned_decimal_to_string(char *string_for_number, Options options,
@@ -445,8 +463,8 @@ char *print_u(char *str, Options options, char format, va_list *arg) {
   unsigned long int number = 0;
   if (format == 'l')
     number = (unsigned long int)va_arg(*arg, unsigned long int);
-  // else if (format == 'h')
-    // number = (unsigned short)va_arg(*arg, unsigned short);
+  else if (format == 'h')
+    number = (unsigned short)va_arg(*arg, unsigned int);
   else
     number = (unsigned int)va_arg(*arg, unsigned int);
 
@@ -455,7 +473,6 @@ char *print_u(char *str, Options options, char format, va_list *arg) {
 
   if (string_for_number) {
     int i = unsigned_decimal_to_string(string_for_number, options, number, size);
-
     str = reverse_and_pad(str, string_for_number, i, options.width);
   }
 
@@ -798,21 +815,18 @@ char *print_eg(char *str, Options options, char format, va_list *arg) {
     else
       size += 3;
   }
-
   size += get_size_eg(&options, number);
   if ((int)size < options.accuracy)
     size = options.accuracy;
   if ((int)size < options.width)
     size = options.width;
-  char *string_for_number = malloc(sizeof(char) * size);
 
+  char *string_for_number = malloc(sizeof(char) * size);
   if (string_for_number) {
     int i = double_to_string(number, options, string_for_number, size, e);
-
     // reverse
     str = reverse_and_pad(str, string_for_number, i, options.width);
   }
-
   if (string_for_number)
     free(string_for_number);
 
@@ -877,16 +891,158 @@ char *print_p(char *str, Options *options, va_list *arg) {
 }
 
 int main() {
-  char str[10];
-  printf("my func\n");
-  s21_sprintf(str, "%");
-  printf("%s", str);
+      char buffer[100];
 
-  printf("\norigin func\n");
+    // Specifier: c
+    // char charValue = 'A';
+    // s21_sprintf(buffer, "Specifier: %%c - Character: %c", charValue);
+    // printf("Formatted string: %s\n", buffer);
 
-  char str2[10];
-  sprintf(str2, "%");
-  printf("%s", str2);
+    // sprintf(buffer, "Specifier: %%c - Character: %c", charValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // // Specifier: d
+    // int intValue = -42;
+    // s21_sprintf(buffer, "Specifier: %%d - Integer: %d", intValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // sprintf(buffer, "Specifier: %%d - Integer: %d", intValue);
+    // printf("Formatted string: %s\n", buffer);
+    
+    // // Specifier: f
+    // float floatValue = 3.14159;
+    // s21_sprintf(buffer, "Specifier: %%f - Float: %f", floatValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // sprintf(buffer, "Specifier: %%f - Float: %f", floatValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // // Specifier: s
+    // char stringValue[] = "Hello, World!";
+    // s21_sprintf(buffer, "Specifier: %%s - String: %s", stringValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // sprintf(buffer, "Specifier: %%s - String: %s", stringValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // Specifier: u
+    unsigned int uintValue = 99;
+    s21_sprintf(buffer, "Specifier: %%u - Unsigned Integer: %  u", uintValue);
+    printf("Formatted string: %s\n", buffer);
+
+    sprintf(buffer, "Specifier: %%u - Unsigned Integer: %  u", uintValue);
+    printf("Formatted string: %s\n", buffer);
+    
+        // Specifier: x (hexadecimal)
+    int hexValue = 0x2A;  // Hex representation of 42 in decimal
+    s21_sprintf(buffer, "Specifier: %%x - Hexadecimal (lowercase): %x", hexValue);
+    printf("Formatted string: %s\n", buffer);
+
+ sprintf(buffer, "Specifier: %%x - Hexadecimal (lowercase): %x", hexValue);
+    printf("Formatted string: %s\n", buffer);
+
+    // Specifier: X (hexadecimal, uppercase)
+    s21_sprintf(buffer, "Specifier: %%X - Hexadecimal (uppercase): %X", hexValue);
+    printf("Formatted string: %s\n", buffer);
+
+    sprintf(buffer, "Specifier: %%X - Hexadecimal (uppercase): %X", hexValue);
+    printf("Formatted string: %s\n", buffer);
+
+    // Specifier: o (octal)
+    unsigned int octalValue = 077;  // Octal representation of 63 in decimal
+    s21_sprintf(buffer, "Specifier: %%o - Octal: %o", octalValue);
+    printf("Formatted string: %s\n", buffer);
+
+sprintf(buffer, "Specifier: %%o - Octal: %o", octalValue);
+    printf("Formatted string: %s\n", buffer);
+
+    // Flags: -
+    s21_sprintf(buffer, "Flags: %%-8x - Left-justified Hexadecimal: %-8x", hexValue);
+    printf("Formatted string: %s\n", buffer);
+
+     sprintf(buffer, "Flags: %%-8x - Left-justified Hexadecimal: %-8x", hexValue);
+    printf("Formatted string: %s\n", buffer);
+
+    // Flags: #
+    s21_sprintf(buffer, "Flags: %%#x - Hexadecimal with '0x' prefix: %#x", hexValue);
+    printf("Formatted string: %s\n", buffer);
+    
+     sprintf(buffer, "Flags: %%#x - Hexadecimal with '0x' prefix: %#x", hexValue);
+    printf("Formatted string: %s\n", buffer);
+
+
+    // Width description: (number)
+    s21_sprintf(buffer, "Width: %%10x - Width of 10 for Hexadecimal: %10x", hexValue);
+    printf("Formatted string: %s\n", buffer);
+
+     sprintf(buffer, "Width: %%10x - Width of 10 for Hexadecimal: %10x", hexValue);
+    printf("Formatted string: %s\n", buffer);
+
+    // Precision and Width combined
+    s21_sprintf(buffer, "Width and Precision: %%#08.4o - Width 8, Precision 4 for Octal: %#08.4o", octalValue);
+    printf("Formatted string: %s\n", buffer);
+
+    sprintf(buffer, "Width and Precision: %%#08.4o - Width 8, Precision 4 for Octal: %#08.4o", octalValue);
+    printf("Formatted string: %s\n", buffer);
+    // // Specifier: %
+    // s21_sprintf(buffer, "Specifier: %%%% - Literal Percent Sign: %%");
+    // printf("Formatted string: %s\n", buffer);
+
+    // sprintf(buffer, "Specifier: %%%% - Literal Percent Sign: %%");
+    // printf("Formatted string: %s\n", buffer);
+
+    // // Flags: -
+    // s21_sprintf(buffer, "Flags: %%-10s - Left-justified String: %-10s", stringValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    //  sprintf(buffer, "Flags: %%-10s - Left-justified String: %-10s", stringValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // // Flags: +
+    // s21_sprintf(buffer, "Flags: %%+d - Plus sign for positive Integer: %+d", intValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    //  sprintf(buffer, "Flags: %%+d - Plus sign for positive Integer: %+d", intValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // // Flags: (space)
+    // s21_sprintf(buffer, "Flags: %% d - Space for positive Integer: % d", intValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // sprintf(buffer, "Flags: %% d - Space for positive Integer: % d", intValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // // Width description: (number)
+    // s21_sprintf(buffer, "Width: %%10s - Width of 10 for String: %10s", stringValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // sprintf(buffer, "Width: %%10s - Width of 10 for String: %10s", stringValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // // Precision description: .(number)
+    // s21_sprintf(buffer, "Precision: %%.*f - Precision of 2 for Float: %.*f", 2, floatValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // sprintf(buffer, "Precision: %%.*f - Precision of 2 for Float: %.*f", 2, floatValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // // Length description: h
+    // short shortValue = 42;
+    // s21_sprintf(buffer, "Length: %%hd - Short Integer: %hd", shortValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // sprintf(buffer, "Length: %%hd - Short Integer: %hd", shortValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // // Length description: l
+    // long long longValue = 9876543210;
+    // s21_sprintf(buffer, "Length: %%ld - Long Integer: %ld", longValue);
+    // printf("Formatted string: %s\n", buffer);
+
+    // sprintf(buffer, "Length: %%ld - Long Integer: %ld", longValue);
+    // printf("Formatted string: %s\n", buffer);
+
+
   return 0;
 }
 

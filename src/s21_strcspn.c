@@ -2,7 +2,7 @@
 
 s21_size_t s21_strcspn(const char *str1, const char *str2) {
   const char *s = str1;
-  const char *c;
+  const char *c = S21_NULL;
 
   while (*str1) {
     for (c = str2; *c; c++) {
