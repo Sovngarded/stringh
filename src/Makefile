@@ -30,7 +30,7 @@ test: $(TARGET)
 	@echo "----------------------------------------------------------------------"
 
 run:
-	gcc -g test_main0.c s21_memcpy.c s21_strlen.c
+	gcc -g test_main0.c s21_memcpy.c s21_strlen.c s21_strncpy.c
 
 gcov_report: test 
 	lcov -t "test" -o test.info -c -d .	

@@ -56,7 +56,6 @@ const char *set_options(Options *options, const char *format, va_list *arg) {
   if (options->addit_type != 0)
     format++;
 
-  // here should be logic for width<0, but it's unreal situation
   return format;
 }
 
@@ -190,8 +189,7 @@ s21_size_t get_size_decimal(long int number, Options *options) {
 }
 
 int decimal_handle_flags(char *string_for_number, Options options,
-                         s21_size_t size, int i, long int number,
-                         char data_type) {
+                         s21_size_t size, int i, long int number) {
   while (options.is_zero && string_for_number &&
          (size - options.flag_size > 0) && (options.accuracy || number < 0)) {
     if (size == 1 && options.flag_size == 1)
@@ -202,30 +200,29 @@ int decimal_handle_flags(char *string_for_number, Options options,
     options.accuracy--;
   }
 
-  if (data_type == 'u') {
-    if (options.is_hash && options.number_system == 8) {
-      string_for_number[i] = '0';
-      i++;
-      size--;
-    } else if (options.is_hash && options.number_system == 16 &&
-               options.upper_case) {
-      string_for_number[i] = 'X';
-      i++;
-      size--;
-      string_for_number[i] = '0';
-      i++;
-      size--;
-    } else if (options.is_hash && options.number_system == 16 &&
-               !options.upper_case) {
-      string_for_number[i] = 'x';
-      i++;
-      size--;
-      string_for_number[i] = '0';
-      i++;
-      size--;
-    }
+  // if (data_type == 'u') {
+  //   if (options.is_hash && options.number_system == 8 && size > 0 && number != 0) {
+  //     string_for_number[i] = '0';
+  //     i++;
+  //     size--;
+  //   } else if (options.is_hash && options.number_system == 16 &&
+  //              options.upper_case && size > 1) {
+  //     string_for_number[i] = 'X';
+  //     i++;
+  //     size--;
+  //     string_for_number[i] = '0';
+  //     i++;
+  //     size--;
+  //   } else if (options.is_hash && options.number_system == 16 &&
+  //              !options.upper_case && size > 1) {
+  //     string_for_number[i] = 'x';
+  //     i++;
+  //     size--;
+  //     string_for_number[i] = '0';
+  //     i++;
+  //     size--;
+  //   }
 
-  } else if (data_type == 'd') {
     if (options.is_blank && number >= 0 && size) {
       string_for_number[i] = ' ';
       i++;
@@ -242,7 +239,7 @@ int decimal_handle_flags(char *string_for_number, Options options,
       i++;
       size--;
     }
-  }
+  
 
   if (size > 0 && !options.is_minus) {
     while ((size - options.flag_size > 0) && string_for_number) {
@@ -298,7 +295,7 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
   if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
     options.is_zero = 0;
 
-  i = decimal_handle_flags(string_for_number, options, size, i, number, 'd');
+  i = decimal_handle_flags(string_for_number, options, size, i, number);
   return i;
 }
 
@@ -324,6 +321,7 @@ char *print_decimal(char *str, Options options, va_list *arg) {
   if (string_for_number)
     free(string_for_number);
 
+   *str = '\0';
   return str;
 }
 // end decimal
@@ -366,6 +364,7 @@ char* reverse_and_pad(char *str, const char *string_for_number, int length, int 
   while (length < width) {
     *str = ' ';
     str++;
+    //length++;
   }
   return str;
 }
@@ -394,70 +393,184 @@ s21_size_t get_size_unsigned_decimal(unsigned long int number,
                                      Options *options) {
   s21_size_t result = 0;
   unsigned long int copy_num = number;
-
   while (copy_num > 0) {
-    copy_num /= 10;
+    copy_num /= options->number_system;
     result++;
   }
-
   if (copy_num == 0 && result == 0 &&
-      (options->is_blank && options->width && options->accuracy)) {
+      (options->accuracy || options->width || options->is_blank)) {
     result++;
   }
-
-  if ((s21_size_t)options->width > result)
+  if ((s21_size_t)options->width > result) {
     result = options->width;
-  if ((s21_size_t)options->accuracy > result)
+  }
+  if ((s21_size_t)options->accuracy > result) {
     result = options->accuracy;
-
-  if (result == 0 && copy_num == 0 && !options->width && !options->accuracy &&
-      !options->is_blank && !options->is_dot)
+  }
+  if (options->is_blank || options->is_plus) {
+    options->flag_size = 1;
     result++;
-
+  }
+  if (result == 0 && copy_num == 0 && !options->accuracy && !options->width &&
+      !options->is_blank && !options->is_dot) {
+    result++;
+  }
+  if (options->is_hash && options->number_system == 16) result += 2;
+  if (options->is_hash && options->number_system == 8) result++;
   return result;
+}
+
+int unsigned_decimal_handle_flags(char *string_for_number, Options options,
+                         s21_size_t size, int i, long int number) {
+
+        while (options.is_zero && string_for_number &&
+         (size - options.flag_size > 0) && (options.accuracy || number < 0)) {
+    if (size == 1 && options.flag_size == 1)
+      break;
+    string_for_number[i] = '0';
+    i++;
+    size--;
+    options.accuracy--;
+  }
+
+    if (options.is_hash && options.number_system == 8 && size > 0 && number != 0) {
+      string_for_number[i] = '0';
+      i++;
+      size--;
+    } else if (options.is_hash && options.number_system == 16 &&
+               options.upper_case && size > 1) {
+      string_for_number[i] = 'X';
+      i++;
+      size--;
+      string_for_number[i] = '0';
+      i++;
+      size--;
+    } else if (options.is_hash && options.number_system == 16 &&
+               !options.upper_case && size > 1) {
+      string_for_number[i] = 'x';
+      i++;
+      size--;
+      string_for_number[i] = '0';
+      i++;
+      size--;
+    
+  if (size > 0 && !options.is_minus) {
+    while ((size - options.flag_size > 0 && size > 0) && string_for_number && (options.is_blank == 1 && options.width == 0)) {
+      string_for_number[i] = ' ';
+      i++;
+      size--;
+    }
+  }
+  return i;
+}
 }
 
 int unsigned_decimal_to_string(char *string_for_number, Options options,
                                unsigned long int number, s21_size_t size) {
-  if ((options.is_hash && options.number_system == 8))
+
+int i = 0;
+  int flag = 0;
+  unsigned long int copy_num = number;
+  unsigned long int copy_num_2 = number;
+  int flag_minus = 0;
+  int sym_place = 0;
+
+  while (copy_num_2 > 0) {
+    copy_num_2 /= 10;
+    sym_place++;
+  }
+  if ((int)size - sym_place > 0) {
+    flag_minus = 1;
+  }
+  if (options.is_blank == 1 && options.is_minus == 1) {
+    sym_place++;
+  }
+  if (options.is_hash && options.number_system == 8) {
     options.flag_size = 1;
-  else if (options.is_hash && options.number_system == 16)
+  } else if (options.is_hash && options.number_system == 16) {
     options.flag_size = 2;
+  }
+  
 
-  int i = 0;
-  unsigned long int number_copy = number;
-
-  if ((number_copy == 0 &&
-       (options.accuracy || options.width || options.is_blank)) ||
-      (number_copy == 0 && !options.accuracy && !options.width &&
-       !options.is_blank && !options.is_dot)) {
-    char c = convert_num_to_char(number_copy % options.number_system,
-                                 options.upper_case);
-    string_for_number[i] = c;
+   if ((copy_num == 0 && size && options.is_dot != 1)) {
+    string_for_number[i] = '0';
     i++;
     size--;
+    copy_num /= 10;
+  }
+  if ((int)number < 0) {
+    sym_place++;
   }
 
-  while (number_copy != 0 && string_for_number && size) {
-    char c = convert_num_to_char(number_copy % options.number_system,
-                                 options.upper_case);
-    string_for_number[i] = c;
+ while (copy_num && string_for_number && size) {
+    if (flag_minus == 1 && options.is_minus) {
+      while (((int)size - sym_place > 0) &&
+             (!options.is_hash && options.number_system != 16)) {
+        string_for_number[i] = ' ';
+        i++;
+        size--;
+      }
+    }
+    char sym = convert_num_to_char(copy_num % options.number_system, options.upper_case);
+    string_for_number[i] = sym;
     i++;
     size--;
-    number_copy /= 10;
+    copy_num /= options.number_system;
   }
 
   if (options.accuracy - i > 0) {
     options.accuracy -= i;
     options.is_zero = 1;
-  }
+  } else flag = 1;
 
-  if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
+    if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
     options.is_zero = 0;
 
-  i = decimal_handle_flags(string_for_number, options, size, i, number, 'u');
-  return i;
+ i = unsigned_decimal_handle_flags(string_for_number, options, size, i, number);
+
+ return i;
 }
+
+
+//   if ((options.is_hash && options.number_system == 8))
+//     options.flag_size = 1;
+//   else if (options.is_hash && options.number_system == 16)
+//     options.flag_size = 2;
+
+//   int i = 0;
+//   unsigned long int number_copy = number;
+
+//   if ((number_copy == 0 &&
+//        (options.accuracy || options.width || options.is_blank)) ||
+//       (number_copy == 0 && !options.accuracy && !options.width &&
+//        !options.is_blank && !options.is_dot)) {
+//     char c = convert_num_to_char(number_copy % options.number_system,
+//                                  options.upper_case);
+//     string_for_number[i] = c;
+//     i++;
+//     size--;
+//   }
+
+//   while (number_copy != 0 && string_for_number && size) {
+//     char c = convert_num_to_char(number_copy % options.number_system,
+//                                  options.upper_case);
+//     string_for_number[i] = c;
+//     i++;
+//     size--;
+//     number_copy /= options.number_system;
+//   }
+
+//   if (options.accuracy - i > 0) {
+//     options.accuracy -= i;
+//     options.is_zero = 1;
+//   }
+
+//   if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
+//     options.is_zero = 0;
+
+ // i = decimal_handle_flags(string_for_number, options, size, i, number, 'u');
+//   return i;
+// }
 
 char *print_u(char *str, Options options, char format, va_list *arg) {
   unsigned long int number = 0;
@@ -479,6 +592,7 @@ char *print_u(char *str, Options options, char format, va_list *arg) {
   if (string_for_number)
     free(string_for_number);
 
+  *str = '\0';
   return str;
 }
 // end unsingned + x, o,
@@ -504,6 +618,7 @@ char *print_c(char *str, Options options, int symbol) {
     }
     ptr = str;
   }
+  *str = '\0';
   return ptr;
 }
 
@@ -542,6 +657,11 @@ char *print_s(char *str, Options options, va_list *arg) {
       blank--;
     }
   } else {
+    while (options.width > 6) {
+      *str = ' ';
+      str++;
+      options.width--;
+    }
     str = s21_memcpy(str, "(null)", 6);
     str += 6;
   }
@@ -576,26 +696,26 @@ int print_e(int e, s21_size_t *size, char *string_for_number, Options options,
             int *i) {
   int copy_e = e;
   if (copy_e == 0) {
-    // *size -= add_to(string_for_number + *i, i,
-    //                 convert_num_to_char(copy_e % options.number_system,
-    //                                     options.upper_case));
+    *size -= add_char_to_str(string_for_number + *i, i,
+                    convert_num_to_char(copy_e % options.number_system,
+                                        options.upper_case));
   }
   while (copy_e) {
-    // *size -= add_to(string_for_number + *i, i,
-    //                 convert_num_to_char(copy_e % options.number_system,
-    //                                     options.upper_case));
+    *size -= add_char_to_str(string_for_number + *i, i,
+                    convert_num_to_char(copy_e % options.number_system,
+                                        options.upper_case));
     copy_e /= 10;
   }
-  // if (e < 10)
-  //   *size -= add_to(string_for_number + *i, i, '0');
-  // if (options.e == 2 || e == 0)
-  //   *size -= add_to(string_for_number + *i, i, '+');
-  // else
-  //   *size -= add_to(string_for_number + *i, i, '-');
-  // if (options.upper_case)
-  //   *size -= add_to(string_for_number + *i, i, 'E');
-  // else
-  //   *size -= add_to(string_for_number + *i, i, 'e');
+  if (e < 10)
+    *size -= add_char_to_str(string_for_number + *i, i, '0');
+  if (options.e == 2 || e == 0)
+    *size -= add_char_to_str(string_for_number + *i, i, '+');
+  else
+    *size -= add_char_to_str(string_for_number + *i, i, '-');
+  if (options.upper_case)
+    *size -= add_char_to_str(string_for_number + *i, i, 'E');
+  else
+    *size -= add_char_to_str(string_for_number + *i, i, 'e');
 
   return 0;
 }
@@ -642,7 +762,17 @@ int print_e(int e, s21_size_t *size, char *string_for_number, Options options,
 //     }
 // }
 
-s21_size_t add_parts_to_string(char *string, Options options, int accuracy,
+int add_char_to_str(char *str, int *i, char symbol) {
+  *str = symbol;
+  *i += 1;
+  return 1;
+}
+
+
+///////////////////
+//////////////////
+////////////////////
+s21_size_t add_parts_of_num_to_string(char *string, Options options, int accuracy,
                                s21_size_t size, int *i,
                                long double fractional_part,
                                long double integer_part) {
@@ -669,8 +799,8 @@ s21_size_t add_parts_to_string(char *string, Options options, int accuracy,
     accuracy--;
   }
 
-  // if (fmodl(fabsl(fractional_part) * 10, 10.0) > 4)
-    // fractional_part = roundl(fractional_part);
+  if (fmodl(fabsl(fractional_part) * 10, 10.0) > 4)
+    fractional_part = roundl(fractional_part);
 
   if (options.g) {
     while ((long)fractional_part % 10 == 0 && options.accuracy > 0 &&
@@ -684,10 +814,54 @@ s21_size_t add_parts_to_string(char *string, Options options, int accuracy,
   if ((long)fractional_part == 0)
     dot = 1;
 
-  return 0;
-  // return add_s_from_d_to_str(string, options, accuracy, dot, size, i,
-  //                            fractional_part, integer_part);
+  return add_sym_from_double_to_str(string, options, accuracy, dot, size, i,
+                             fractional_part, integer_part);
 }
+
+int add_sym_from_double_to_str(char *str_to_double, Options options, int accurancy,
+                               int flag_to_dot, s21_size_t size_to_double,
+                               int *i, long double frac, long double integer) {
+  while (str_to_double && (accurancy != options.accuracy) && options.accuracy > 0) {
+    if (options.g && flag_to_dot) {
+      size_to_double--;
+      break;
+    }
+    size_to_double -= add_char_to_str(
+        str_to_double + *i, i,
+        convert_num_to_char((long)frac % options.number_system, options.upper_case));
+    frac /= options.number_system;
+    accurancy++;
+  }
+  if (options.accuracy) {
+    if (flag_to_dot && options.g) {
+      size_to_double--;
+    } else {
+      size_to_double -= add_char_to_str(str_to_double + *i, i, '.');
+    }
+  }
+  if (options.is_hash && !options.accuracy) {
+    size_to_double -= add_char_to_str(str_to_double + *i, i, '.');
+  }
+  if ((long)integer == 0) {
+    size_to_double -= add_char_to_str(
+        str_to_double + *i, i,
+        convert_num_to_char((long)integer % options.number_system, options.upper_case));
+    integer /= options.number_system;
+  }
+  while ((long)integer && str_to_double && size_to_double) {
+    size_to_double -= add_char_to_str(
+        str_to_double + *i, i,
+        convert_num_to_char((long)integer % options.number_system, options.upper_case));
+    integer /= options.number_system;
+  }
+  return size_to_double;
+}
+
+//////////////
+/////////////
+///////////
+//////////////
+
 
 int double_handle_flags(char *string_for_number, Options options,
                         s21_size_t size, int i, long double number) {
@@ -701,25 +875,36 @@ int double_handle_flags(char *string_for_number, Options options,
     options.accuracy--;
   }
 
-  if (options.is_blank && number >= 0 && size) {
+  if (options.is_blank && number >= 0.0000000000001 && size) {
     string_for_number[i] = ' ';
     i++;
     size--;
   }
-
-  if (number < 0 && size) {
+  if (number < 0.0000000000001 && size && !options.e) {
     string_for_number[i] = '-';
+    if (options.e && options.flag_size && options.width) options.flag_size = 0;
     i++;
     size--;
   }
-  if (number > 0 && options.is_plus && size) {
+  if (number < 0 && size && options.e) {
+    string_for_number[i] = '-';
+    if (options.e && options.flag_size && options.width) options.flag_size = 0;
+    i++;
+    size--;
+  }
+  if (number > 0.0000000000001 && options.is_plus && size) {
     string_for_number[i] = '+';
     i++;
     size--;
   }
 
+  int flag_g = 0;
+    if (options.g && options.width > 8) {
+      flag_g = 1;
+    }
+
   if (size > 0 && options.is_minus == 0) {
-    while ((size - options.flag_size > 0) && string_for_number) {
+    while ((size - options.flag_size + flag_g > 0) && string_for_number) {
       if (options.g && options.width < options.accuracy)
         break;
       string_for_number[i] = ' ';
@@ -732,8 +917,7 @@ int double_handle_flags(char *string_for_number, Options options,
 
 int double_to_string(long double number, Options options,
                      char *string_for_number, s21_size_t size, int e) {
-  int i = 0;
-  // int i = is_nan_of_inf(string_for_number, number, options);
+  int i = is_nan_or_inf(string_for_number, number, options);
   if (!i) {
     if (options.e)
       print_e(e, &size, string_for_number, options, &i);
@@ -747,10 +931,9 @@ int double_to_string(long double number, Options options,
     long double fractional_part = modfl(number, &integer_part);
 
     int accuracy = options.accuracy;
-    size = add_parts_to_string(string_for_number, options, accuracy, size, &i,
+    size = add_parts_of_num_to_string(string_for_number, options, accuracy, size, &i,
                                fractional_part, integer_part);
-    // size = add_s_from_d_to_str(string_for_number, options, accuracy, dot,
-    // size, &i, fractional_part, integer_part);
+
     if (flag)
       number = -number;
 
@@ -781,19 +964,83 @@ char *print_double(char *str, Options options, char format, va_list *arg) {
   if (string_for_number)
     free(string_for_number);
 
+  *str = '\0';
   return str;
 }
 // end double f F
 
 // e E g G
-s21_size_t get_size_eg(Options *options, long double number) {
-  number = options->accuracy;
-  number--;
-
-  return 0;
+s21_size_t get_size_eg(Options *option, long double number) {
   //разбиваем на две части (целая6 дробная) + место под точку
   //место под е и + под 0n
   //если асс или видтх больше6 то добавляем
+  int size = 0;
+  int flag = 0;
+  if (!option->accuracy && !option->g && !option->is_dot) {
+    option->accuracy = 6;
+    flag = 1;
+  }
+  if (option->g) {
+    long double copy_num = number;
+    long double int_part = 0;
+    long double float_part = modfl(copy_num, &int_part);
+    int count = 1;
+    if ((long)int_part > 0) {
+      size--;
+    }
+    if (copy_num <= 0.000000000001) {
+      copy_num = -copy_num;
+    }
+    float_part = modfl(copy_num, &int_part);
+    while ((long)int_part > 0 && fabsl(number) > 0) {
+      int_part /= 10;
+      count++;
+    }
+    option->accuracy -= count;
+    size += count + 1;
+    int acc = option->accuracy;
+    if (count > 6) {
+      acc = 0;
+      size -= 1;
+    }
+    while (acc && acc > 0 && fabsl(number) > 0) {
+      float_part *= 10;
+      acc--;
+      if ((long)float_part == 0) {
+        acc++;
+        option->accuracy++;
+      }
+      if (option->is_dot && flag && fabsl(number) > 0) {
+        acc++;
+        break;
+      }
+    }
+    float_part += 0.0000000001;
+    while ((long)float_part % 10 == 0 && option->accuracy > 0 &&
+           fabsl(number) > 0) {
+      acc++;
+      float_part /= 10;
+      size--;
+    }
+    if (size < 0) {
+      size = 0;
+    }
+    option->accuracy -= acc - 1;
+  }
+  if (option->is_plus || option->is_blank || number < 0.000000000001) {
+    option->flag_size = 1;
+    size++;
+  }
+  if (option->e) {
+    size += 3;  // integer +/- E/e
+    size += option->accuracy + 1;
+    if (option->is_plus || option->is_blank || number < 0) {
+      size++;
+    }
+  } else {
+    size += option->accuracy;
+  }
+  return size;
 }
 
 char *print_eg(char *str, Options options, char format, va_list *arg) {
@@ -830,6 +1077,7 @@ char *print_eg(char *str, Options options, char format, va_list *arg) {
   if (string_for_number)
     free(string_for_number);
 
+  *str = '\0';
   return str;
 }
 
@@ -839,7 +1087,7 @@ Options shrtst(Options options, long double number) {
   int e = normalize(&copy_number, &copy_opt);
   if (copy_opt.accuracy == 0 && !copy_opt.is_dot)
     copy_opt.accuracy = 6;
-  if ((e <= 4 && copy_opt.e == 1) || (copy_opt.e == 2 && e < 6)) {
+  if ((e <= 4 && copy_opt.e == 1) || (copy_opt.e == 2 && e <= 5)) {
     copy_opt.e = 0;
   }
   return copy_opt;
@@ -867,6 +1115,33 @@ long double normalize(long double *num, Options *options) {
   return i;
 }
 
+s21_size_t is_nan_or_inf(char *str, long double number, Options option) {
+  int flag = 0;
+  if (isnan(number)) {
+    if (option.upper_case) {
+      s21_strncpy(str, "NAN", 3);
+    } else {
+      s21_strncpy(str, "nan", 3);
+    }
+    flag = 3;
+  } else if (number == INFINITY) {
+    if (option.upper_case) {
+      s21_strncpy(str, "FNI", 3);
+    } else {
+      s21_strncpy(str, "fni", 3);
+    }
+    flag = 3;
+  } else if (number == -INFINITY) {
+    if (option.upper_case) {
+      s21_strncpy(str, "FNI-", 4);
+    } else {
+      s21_strncpy(str, "fni-", 4);
+    }
+    flag = 4;
+  }
+  return flag;
+}
+
 // end e E g G
 
 char *print_p(char *str, Options *options, va_list *arg) {
@@ -887,43 +1162,44 @@ char *print_p(char *str, Options *options, va_list *arg) {
   if (string_for_ptr)
     free(string_for_ptr);
 
+  *str = '\0';
   return str;
 }
 
 int main() {
       char buffer[100];
 
-    // Specifier: c
-    // char charValue = 'A';
-    // s21_sprintf(buffer, "Specifier: %%c - Character: %c", charValue);
-    // printf("Formatted string: %s\n", buffer);
+    //Specifier: c
+    char charValue = 'A';
+    s21_sprintf(buffer, "Specifier: %%c - Character: %c", charValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // sprintf(buffer, "Specifier: %%c - Character: %c", charValue);
-    // printf("Formatted string: %s\n", buffer);
+    sprintf(buffer, "Specifier: %%c - Character: %c", charValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // // Specifier: d
-    // int intValue = -42;
-    // s21_sprintf(buffer, "Specifier: %%d - Integer: %d", intValue);
-    // printf("Formatted string: %s\n", buffer);
+    // Specifier: d
+    int intValue = -42;
+    s21_sprintf(buffer, "Specifier: %%d - Integer: %d", intValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // sprintf(buffer, "Specifier: %%d - Integer: %d", intValue);
-    // printf("Formatted string: %s\n", buffer);
+    sprintf(buffer, "Specifier: %%d - Integer: %d", intValue);
+    printf("Formatted string: %s\n", buffer);
     
-    // // Specifier: f
-    // float floatValue = 3.14159;
-    // s21_sprintf(buffer, "Specifier: %%f - Float: %f", floatValue);
-    // printf("Formatted string: %s\n", buffer);
+    // Specifier: f
+    float floatValue = 3.14159;
+    s21_sprintf(buffer, "Specifier: %%f - Float: %f", floatValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // sprintf(buffer, "Specifier: %%f - Float: %f", floatValue);
-    // printf("Formatted string: %s\n", buffer);
+    sprintf(buffer, "Specifier: %%f - Float: %f", floatValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // // Specifier: s
-    // char stringValue[] = "Hello, World!";
-    // s21_sprintf(buffer, "Specifier: %%s - String: %s", stringValue);
-    // printf("Formatted string: %s\n", buffer);
+    // Specifier: s
+    char stringValue[] = "Hello, World!";
+    s21_sprintf(buffer, "Specifier: %%s - String: %s", stringValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // sprintf(buffer, "Specifier: %%s - String: %s", stringValue);
-    // printf("Formatted string: %s\n", buffer);
+    sprintf(buffer, "Specifier: %%s - String: %s", stringValue);
+    printf("Formatted string: %s\n", buffer);
 
     // Specifier: u
     unsigned int uintValue = 99;
@@ -957,11 +1233,11 @@ sprintf(buffer, "Specifier: %%o - Octal: %o", octalValue);
     printf("Formatted string: %s\n", buffer);
 
     // Flags: -
-    s21_sprintf(buffer, "Flags: %%-8x - Left-justified Hexadecimal: %-8x", hexValue);
-    printf("Formatted string: %s\n", buffer);
+    // s21_sprintf(buffer, "Flags: %%-8x - Left-justified Hexadecimal: %-8x", hexValue);
+    // printf("Formatted string: %s\n", buffer);
 
-     sprintf(buffer, "Flags: %%-8x - Left-justified Hexadecimal: %-8x", hexValue);
-    printf("Formatted string: %s\n", buffer);
+    //  sprintf(buffer, "Flags: %%-8x - Left-justified Hexadecimal: %-8x", hexValue);
+    // printf("Formatted string: %s\n", buffer);
 
     // Flags: #
     s21_sprintf(buffer, "Flags: %%#x - Hexadecimal with '0x' prefix: %#x", hexValue);
@@ -984,63 +1260,63 @@ sprintf(buffer, "Specifier: %%o - Octal: %o", octalValue);
 
     sprintf(buffer, "Width and Precision: %%#08.4o - Width 8, Precision 4 for Octal: %#08.4o", octalValue);
     printf("Formatted string: %s\n", buffer);
-    // // Specifier: %
-    // s21_sprintf(buffer, "Specifier: %%%% - Literal Percent Sign: %%");
-    // printf("Formatted string: %s\n", buffer);
+    // Specifier: %
+    s21_sprintf(buffer, "Specifier: %%%% - Literal Percent Sign: %%");
+    printf("Formatted string: %s\n", buffer);
 
-    // sprintf(buffer, "Specifier: %%%% - Literal Percent Sign: %%");
-    // printf("Formatted string: %s\n", buffer);
+    sprintf(buffer, "Specifier: %%%% - Literal Percent Sign: %%");
+    printf("Formatted string: %s\n", buffer);
 
-    // // Flags: -
-    // s21_sprintf(buffer, "Flags: %%-10s - Left-justified String: %-10s", stringValue);
-    // printf("Formatted string: %s\n", buffer);
+    // Flags: -
+    s21_sprintf(buffer, "Flags: %%-10s - Left-justified String: %-10s", stringValue);
+    printf("Formatted string: %s\n", buffer);
 
-    //  sprintf(buffer, "Flags: %%-10s - Left-justified String: %-10s", stringValue);
-    // printf("Formatted string: %s\n", buffer);
+     sprintf(buffer, "Flags: %%-10s - Left-justified String: %-10s", stringValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // // Flags: +
-    // s21_sprintf(buffer, "Flags: %%+d - Plus sign for positive Integer: %+d", intValue);
-    // printf("Formatted string: %s\n", buffer);
+    // Flags: +
+    s21_sprintf(buffer, "Flags: %%+d - Plus sign for positive Integer: %+d", intValue);
+    printf("Formatted string: %s\n", buffer);
 
-    //  sprintf(buffer, "Flags: %%+d - Plus sign for positive Integer: %+d", intValue);
-    // printf("Formatted string: %s\n", buffer);
+     sprintf(buffer, "Flags: %%+d - Plus sign for positive Integer: %+d", intValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // // Flags: (space)
-    // s21_sprintf(buffer, "Flags: %% d - Space for positive Integer: % d", intValue);
-    // printf("Formatted string: %s\n", buffer);
+    // Flags: (space)
+    s21_sprintf(buffer, "Flags: %% d - Space for positive Integer: % d", intValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // sprintf(buffer, "Flags: %% d - Space for positive Integer: % d", intValue);
-    // printf("Formatted string: %s\n", buffer);
+    sprintf(buffer, "Flags: %% d - Space for positive Integer: % d", intValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // // Width description: (number)
-    // s21_sprintf(buffer, "Width: %%10s - Width of 10 for String: %10s", stringValue);
-    // printf("Formatted string: %s\n", buffer);
+    // Width description: (number)
+    s21_sprintf(buffer, "Width: %%10s - Width of 10 for String: %10s", stringValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // sprintf(buffer, "Width: %%10s - Width of 10 for String: %10s", stringValue);
-    // printf("Formatted string: %s\n", buffer);
+    sprintf(buffer, "Width: %%10s - Width of 10 for String: %10s", stringValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // // Precision description: .(number)
-    // s21_sprintf(buffer, "Precision: %%.*f - Precision of 2 for Float: %.*f", 2, floatValue);
-    // printf("Formatted string: %s\n", buffer);
+    // Precision description: .(number)
+    s21_sprintf(buffer, "Precision: %%.*f - Precision of 2 for Float: %.*f", 2, floatValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // sprintf(buffer, "Precision: %%.*f - Precision of 2 for Float: %.*f", 2, floatValue);
-    // printf("Formatted string: %s\n", buffer);
+    sprintf(buffer, "Precision: %%.*f - Precision of 2 for Float: %.*f", 2, floatValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // // Length description: h
-    // short shortValue = 42;
-    // s21_sprintf(buffer, "Length: %%hd - Short Integer: %hd", shortValue);
-    // printf("Formatted string: %s\n", buffer);
+    // Length description: h
+    short shortValue = 42;
+    s21_sprintf(buffer, "Length: %%hd - Short Integer: %hd", shortValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // sprintf(buffer, "Length: %%hd - Short Integer: %hd", shortValue);
-    // printf("Formatted string: %s\n", buffer);
+    sprintf(buffer, "Length: %%hd - Short Integer: %hd", shortValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // // Length description: l
-    // long long longValue = 9876543210;
-    // s21_sprintf(buffer, "Length: %%ld - Long Integer: %ld", longValue);
-    // printf("Formatted string: %s\n", buffer);
+    // Length description: l
+    long long longValue = 9876543210;
+    s21_sprintf(buffer, "Length: %%ld - Long Integer: %ld", longValue);
+    printf("Formatted string: %s\n", buffer);
 
-    // sprintf(buffer, "Length: %%ld - Long Integer: %ld", longValue);
-    // printf("Formatted string: %s\n", buffer);
+    sprintf(buffer, "Length: %%ld - Long Integer: %ld", longValue);
+    printf("Formatted string: %s\n", buffer);
 
 
   return 0;
