@@ -1087,7 +1087,6 @@ char *print_p(char *str, Options *options, va_list *arg) {
   return str;
 }
 
-
 int main() {
     char buffer[100];
 
