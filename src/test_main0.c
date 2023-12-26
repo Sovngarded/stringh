@@ -200,30 +200,6 @@ int decimal_handle_flags(char *string_for_number, Options options,
     size--;
     options.accuracy--;
   }
-
-  // if (data_type == 'u') {
-  //   if (options.is_hash && options.number_system == 8 && size > 0 && number != 0) {
-  //     string_for_number[i] = '0';
-  //     i++;
-  //     size--;
-  //   } else if (options.is_hash && options.number_system == 16 &&
-  //              options.upper_case && size > 1) {
-  //     string_for_number[i] = 'X';
-  //     i++;
-  //     size--;
-  //     string_for_number[i] = '0';
-  //     i++;
-  //     size--;
-  //   } else if (options.is_hash && options.number_system == 16 &&
-  //              !options.upper_case && size > 1) {
-  //     string_for_number[i] = 'x';
-  //     i++;
-  //     size--;
-  //     string_for_number[i] = '0';
-  //     i++;
-  //     size--;
-  //   }
-
     if (options.is_blank && number >= 0 && size) {
       string_for_number[i] = ' ';
       i++;
@@ -291,7 +267,7 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
     options.accuracy -= i;
     options.is_zero = 1;
   } else
-    change_sign = 1; //???
+    change_sign = 1;
 
   if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
     options.is_zero = 0;
@@ -474,12 +450,8 @@ int i = 0;
   unsigned long int copy_num = number;
   unsigned long int copy_num_2 = number;
   int flag_minus = 0;
-  int sym_place = 0;
+  int sym_place = 0; 
 
-  // int flag_space = 0;
-  // if (options.is_blank == 1 && options.width == 0) {
-  //   flag_space = 1;
-  // }
   while (copy_num_2 > 0) {
     copy_num_2 /= 10;
     sym_place++;
@@ -530,90 +502,10 @@ int i = 0;
   if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
     options.is_zero = 0;
 
-  // while (options.is_zero && string_for_number &&
-  //        (size - options.flag_size > 0) && (options.accuracy || flag)) {
-  //   if ( (size == 1 && options.flag_size == 1))
-  //     break;
-  //   string_for_number[i] = '0';
-  //   i++;
-  //   size--;
-  //   options.accuracy--;
-  // }
-
-  //   if (options.is_hash && options.number_system == 8 && size > 0 && number != 0) {
-  //     string_for_number[i] = '0';
-  //     i++;
-  //     size--;
-  //   } else if (options.is_hash && options.number_system == 16 &&
-  //              options.upper_case && size > 1) {
-  //     string_for_number[i] = 'X';
-  //     i++;
-  //     size--;
-  //     string_for_number[i] = '0';
-  //     i++;
-  //     size--;
-  //   } else if (options.is_hash && options.number_system == 16 &&
-  //              !options.upper_case && size > 1) {
-  //     string_for_number[i] = 'x';
-  //     i++;
-  //     size--;
-  //     string_for_number[i] = '0';
-  //     i++;
-  //     size--;
-  //   }
-    
-  // if (size > 0 && options.is_minus == 0) {
-  //   while ((size - options.flag_size > 0 && size > 0) && string_for_number && flag_space == 0) {
-  //     string_for_number[i] = ' ';
-  //     i++;
-  //     size--;
-  //   }
-  // }
  i = unsigned_decimal_handle_flags(string_for_number, options, size, i, number, flag);
 
  return i;
 }
-
-
-//   if ((options.is_hash && options.number_system == 8))
-//     options.flag_size = 1;
-//   else if (options.is_hash && options.number_system == 16)
-//     options.flag_size = 2;
-
-//   int i = 0;
-//   unsigned long int number_copy = number;
-
-//   if ((number_copy == 0 &&
-//        (options.accuracy || options.width || options.is_blank)) ||
-//       (number_copy == 0 && !options.accuracy && !options.width &&
-//        !options.is_blank && !options.is_dot)) {
-//     char c = convert_num_to_char(number_copy % options.number_system,
-//                                  options.upper_case);
-//     string_for_number[i] = c;
-//     i++;
-//     size--;
-//   }
-
-//   while (number_copy != 0 && string_for_number && size) {
-//     char c = convert_num_to_char(number_copy % options.number_system,
-//                                  options.upper_case);
-//     string_for_number[i] = c;
-//     i++;
-//     size--;
-//     number_copy /= options.number_system;
-//   }
-
-//   if (options.accuracy - i > 0) {
-//     options.accuracy -= i;
-//     options.is_zero = 1;
-//   }
-
-//   if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
-//     options.is_zero = 0;
-
- // i = decimal_handle_flags(string_for_number, options, size, i, number, 'u');
-//   return i;
-// }
 
 char *print_u(char *str, Options options, char format, va_list *arg) {
   unsigned long int number = 0;
@@ -630,15 +522,6 @@ char *print_u(char *str, Options options, char format, va_list *arg) {
   if (string_for_number) {
     int i = unsigned_decimal_to_string(string_for_number, options, number, size);
     str = reverse_and_pad(str, string_for_number, i, options.width);
-  //  for (int j = i - 1; j >= 0; j--) {
-  //     *str = string_for_number[j];
-  //     str++;
-  //   }
-  //   while ((i < options.width)) {
-  //     *str = ' ';
-  //     str++;
-  //   }
-  
   }
 
   if (string_for_number)
@@ -804,58 +687,12 @@ int print_e(int e, s21_size_t *size, char *string_for_number, Options options,
   return 0;
 }
 
-// void pad_zeros(char* string, Options options, s21_size_t size, int* i) {
-//     while (options.is_zero && string && (size - options.flag_size > 0) &&
-//     (options.accuracy || flag)) {
-//         if (size == 1 && options.flag_size == 1)
-//             break;
-//         string[*i] = '0';
-//         (*i)++;
-//         size--;
-//         options.accuracy--;
-//     }
-// }
-
-// void add_space_or_sign(char* string, Options options, long double number,
-// s21_size_t size, int* i) {
-//     if (options.is_blank && number >= 0 && size) {
-//         string[*i] = ' ';
-//         (*i)++;
-//         size--;
-//     }
-
-//     if (number < 0 && size) {
-//         string[*i] = '-';
-//         (*i)++;
-//         size--;
-//     }
-
-//     if (number > 0 && options.is_plus && size) {
-//         string[*i] = '+';
-//         (*i)++;
-//         size--;
-//     }
-
-//     if (size > 0 && options.is_minus == 0) {
-//         while ((size - options.flag_size > 0) && string) {
-//             if (options.g && options.width < options.accuracy) break;
-//             string[*i] = ' ';
-//             (*i)++;
-//             size--;
-//         }
-//     }
-// }
-
 int add_char_to_str(char *str, int *i, char symbol) {
   *str = symbol;
   *i += 1;
   return 1;
 }
 
-
-///////////////////
-//////////////////
-////////////////////
 s21_size_t add_parts_of_num_to_string(char *string, Options options, int accuracy,
                                s21_size_t size, int *i,
                                long double fractional_part,
@@ -883,8 +720,8 @@ s21_size_t add_parts_of_num_to_string(char *string, Options options, int accurac
     accuracy--;
   }
 
-  // if (fmodl(fabsl(fractional_part) * 10, 10.0) > 4)
-  //   fractional_part = roundl(fractional_part);
+  if (fmodl(fabsl(fractional_part) * 10, 10.0) > 4)
+    fractional_part = roundl(fractional_part);
 
   if (options.g) {
     while ((long)fractional_part % 10 == 0 && options.accuracy > 0 &&
@@ -941,15 +778,8 @@ int add_sym_from_double_to_str(char *str_to_double, Options options, int accuran
   return size_to_double;
 }
 
-//////////////
-/////////////
-///////////
-//////////////
-
-
 int double_handle_flags(char *string_for_number, Options options,
                         s21_size_t size, int i, long double number) {
-     // обработка флага  0
     while (options.is_zero && string_for_number &&
            (size - options.flag_size > 0) &&
            (options.accuracy || options.flag_size))  {
@@ -1029,13 +859,10 @@ int double_to_string(long double number, Options options,
     } else
       flag = 1;
 
-    // если не осталось места под нули
     if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
       options.is_zero = 0;
 
     i = double_handle_flags(string_for_number, options, size, i, number);
-    // pad_zeros(string_for_number, options, size, &i);
-    // add_space_or_sign(string_for_number, options, number, size, &i);
   }
   return i;
 }
@@ -1053,19 +880,8 @@ char *print_double(char *str, Options options, char format, va_list *arg) {
 
   if (string_for_number) {
     int i = double_to_string(number, options, string_for_number, size, e);
-
     // reverse
     str = reverse_and_pad(str, string_for_number, i, options.width);
-     /// перепись из буферного массива основной
-    // for (int j = i - 1; j >= 0; j--) {
-    //   *str = str_to_double[j];
-    //   str++;
-    // }
-    // while ((i < options.width)) {
-    //   *str = ' ';
-    //   str++;
-    //   i++;
-    // }
   }
   if (string_for_number)
     free(string_for_number);
@@ -1261,9 +1077,8 @@ char *print_p(char *str, Options *options, va_list *arg) {
 
   if (string_for_ptr) {
     int i = unsigned_decimal_to_string(string_for_ptr, *options, ptr, size);
-    //возмоэно тут что-то другое должно быть ниже...
     str = reverse_and_pad(str, string_for_ptr, i, options->width);
-  } //возмоэно тут что-то другое должно быть выще...
+  }
 
   if (string_for_ptr)
     free(string_for_ptr);
@@ -1271,6 +1086,7 @@ char *print_p(char *str, Options *options, va_list *arg) {
   *str = '\0';
   return str;
 }
+
 
 int main() {
     char buffer[100];

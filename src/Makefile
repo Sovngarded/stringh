@@ -13,7 +13,7 @@ FILE_TESTS =./tests/test_me.c ./tests/test_memchr.c ./tests/test_memcmp.c ./test
 		./tests/test_to_upper.c ./tests/test_trim.c 
 
 TARGET=s21_string.a
-TEST_FLAGS = -lcheck
+TEST_FLAGS =-lcheck
 
 all: gcov_report
 
@@ -30,7 +30,7 @@ test: $(TARGET)
 	@echo "----------------------------------------------------------------------"
 
 run:
-	gcc -g -Wall -Wextra -Werror -std=c11 test_main0.c s21_memcpy.c s21_strlen.c s21_strncpy.c s21_strchr.c
+	gcc -g -Wall -Wextra -Werror -std=c11 -lm test_main0.c s21_memcpy.c s21_strlen.c s21_strncpy.c s21_strchr.c
 
 gcov_report: test 
 	lcov -t "test" -o test.info -c -d .	
