@@ -42,7 +42,7 @@ s21_size_t get_size_unsigned_decimal(unsigned long int number, Options* options)
 char *print_u(char *str, Options options, char format, va_list *arg);
 int unsigned_decimal_to_string(char *string_for_number,Options options, unsigned long int number, s21_size_t size);
 int unsigned_decimal_handle_flags(char *string_for_number, Options options,
-                         s21_size_t size, int i, long int number);
+                         s21_size_t size, int i, long int number, int flag);
 
 char *print_c(char *str, Options options, int symbol);
 char *print_s(char *str,Options options, va_list *arg);
