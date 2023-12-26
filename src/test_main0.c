@@ -11,7 +11,7 @@ typedef unsigned long s21_size_t;
 
 int s21_sprintf(char *str, const char *format, ...) {
   char *copy_str = str;
-  char flags[] = "cdieEfgGosuxXpn%"; //F?
+  char flags[] = "cdieEfFgGosuxXpn%";
 
   va_list arg;
   va_start(arg, format);
@@ -22,6 +22,7 @@ int s21_sprintf(char *str, const char *format, ...) {
       Options options = {0};
       options.number_system = 10;
       format = set_options(&options, format, &arg);
+      while (!s21_strchr(flags, *format)) format++;
       str = parser(str, copy_str, format, options, &arg);
     } else {
       *str = *format; 
@@ -950,7 +951,7 @@ int double_handle_flags(char *string_for_number, Options options,
                         s21_size_t size, int i, long double number) {
      // обработка флага  0
     while (options.is_zero && string_for_number &&
-           (string_for_number - options.flag_size > 0) &&
+           (size - options.flag_size > 0) &&
            (options.accuracy || options.flag_size))  {
     if (size == 1 && options.flag_size == 1)
       break;
@@ -1308,10 +1309,10 @@ int main() {
 
     // Specifier: u
     unsigned int uintValue = 99;
-    s21_sprintf(buffer, "Specifier: %%u - Unsigned Integer: %  u", uintValue);
+    s21_sprintf(buffer, "Specifier: %%u - Unsigned Integer: % u", uintValue);
     printf("Formatted string: %s\n", buffer);
 
-    sprintf(buffer, "Specifier: %%u - Unsigned Integer: %  u", uintValue);
+    //sprintf(buffer, "Specifier: %%u - Unsigned Integer: % u", uintValue);
     printf("Formatted string: %s\n", buffer);
     
         // Specifier: x (hexadecimal)
@@ -1418,7 +1419,7 @@ sprintf(buffer, "Specifier: %%o - Octal: %o", octalValue);
     printf("Formatted string: %s\n", buffer);
 
     // Length description: l
-    long long longValue = 9876543210;
+    long int longValue = 9876543210;
     s21_sprintf(buffer, "Length: %%ld - Long Integer: %ld", longValue);
     printf("Formatted string: %s\n", buffer);
 

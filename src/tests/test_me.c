@@ -54,7 +54,7 @@ Suite *s21_string_test[] = {test_memchr(),
                                test_to_upper(),
                               test_to_lower(),
                               test_insert(),
-                              // test_trim(),
+                              test_trim(),
                               NULL};
 
   for (int i = 0; s21_string_test[i] != NULL; i++) {  // (&& failed == 0)

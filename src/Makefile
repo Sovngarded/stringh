@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -Werror -std=c11
+CFLAGS=-Wall -Wextra -Werror -std=c11 -g
 FILES = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c \
 		s21_strchr.c s21_strcspn.c s21_strlen.c s21_strncat.c \
 		s21_strncmp.c s21_strncpy.c s21_strrchr.c s21_strstr.c \
@@ -30,7 +30,7 @@ test: $(TARGET)
 	@echo "----------------------------------------------------------------------"
 
 run:
-	gcc -g test_main0.c s21_memcpy.c s21_strlen.c s21_strncpy.c
+	gcc -g -Wall -Wextra -Werror -std=c11 test_main0.c s21_memcpy.c s21_strlen.c s21_strncpy.c s21_strchr.c
 
 gcov_report: test 
 	lcov -t "test" -o test.info -c -d .	

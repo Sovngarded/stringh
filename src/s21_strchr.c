@@ -1,24 +1,35 @@
 #include "s21_string.h"
 
 char *s21_strchr(const char *str, int c) {
+  int i = 0;
   char *result = S21_NULL;
-  while (*str != '\0' && result == S21_NULL) {
-    if (*str == (char)c) {
-      result = (char *)str;
-      // return (char*)str;
-    }
-    str++;
+  while (str[i] && str[i] != c) {
+    i++;
   }
-  if (*str == '\0' && result == S21_NULL) {
-    if (*str == (char)c) {
-      result = (char *)str;
-      // return (char*)str;
-    }
+  if (c == str[i]) {
+    result = (char *)str + i;
+  } else {
+    result = S21_NULL;
   }
-
   return result;
-  // return S21_NULL;
 }
+
+// char *s21_strchr(const char *str, int c) {
+//   char *result = S21_NULL;
+//   while (*str != '\0' && result == S21_NULL) {
+//     if (*str == (char)c) {
+//       result = (char *)str;
+//     }
+//     str++;
+//   }
+//   if (*str == '\0' && result == S21_NULL) {
+//     if (*str == (char)c) {
+//       result = (char *)str;
+//     }
+//   }
+
+//   return result;
+// }
 
 // char* s21_strchr(const char* str, int c) {
 //     while (*str) {
