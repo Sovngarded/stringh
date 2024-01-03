@@ -32,7 +32,7 @@ char* print_p(char* str, Options* options, va_list* arg);
 
 char* print_decimal(char* str, Options options, va_list* arg);
 s21_size_t get_size_decimal(long int number, Options* options);
-int decimal_handle_flags(char* string_for_number, Options options, s21_size_t size, int i, long int number);
+int decimal_handle_flags(char* string_for_number, Options options, s21_size_t size, int i, long int number, int change_sign, int flag_zero);
 int decimal_to_string(long int number, Options options, char* string_for_number, s21_size_t size);
 char convert_num_to_char(int num, int upper_case);
 char* reverse_and_pad(char *str, const char *string_for_number, int length, int width);

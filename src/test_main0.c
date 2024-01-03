@@ -153,72 +153,154 @@ char *parser(char *str, char *copy_str, const char *format, Options options,
   return str;
 }
 
-// decimal
+/////////////////////////////////////////
+////////
+// вместо спецификаторов d и i записывает аргументы
+char *print_decimal(char *str, Options options, va_list *arguments) {
+  long int number = 0;
+  // записываем число в number
+  if (options.addit_type == 'l') {
+    number = (long int)va_arg(*arguments, long int);
+  } else if (options.addit_type == 'h') {
+    number = (short)va_arg(*arguments, int);
+  } else {
+    number = (int)va_arg(*arguments, int);
+  }
+    s21_size_t size = get_size_decimal(number, &options);
+  char *string_for_number = malloc(sizeof(char) * size);
+  if (string_for_number) {
+    int i = decimal_to_string(number, options, string_for_number, size);
+
+    for (int j = i - 1; j >= 0; j--) {
+      *str = string_for_number[j];
+      str++;
+    }
+    while ((i < options.width)) {
+      *str = ' ';
+      str++;
+      i++;
+    }
+  }
+  if (string_for_number) {
+    free(string_for_number);
+  }
+  *str = '\0';
+  return str;
+}
+
+// функция для подсчёта размера для buffer
 s21_size_t get_size_decimal(long int number, Options *options) {
   s21_size_t result = 0;
   long int copy_num = number;
-
   if (copy_num < 0) {
-    copy_num = -number;
+    copy_num = -copy_num;
   }
-
   while (copy_num > 0) {
     copy_num /= 10;
     result++;
   }
-
   if (copy_num == 0 && result == 0 &&
-      (options->is_blank && options->width && options->accuracy)) {
+      (options->accuracy || options->width || options->is_blank)) {
     result++;
   }
-
-  if ((s21_size_t)options->width > result)
+  if ((s21_size_t)options->width > result) {
     result = options->width;
-  if ((s21_size_t)options->accuracy > result)
+  }
+  if ((s21_size_t)options->accuracy > result) {
     result = options->accuracy;
-
-  if (options->is_blank || options->is_plus || number < 0) {
+  }
+  // if (options->is_blank || options->is_plus || number < 0) {
+  //   options->flag_size = 1;
+  //   result++;
+  // }
+  if (result == 0 && copy_num == 0 && !options->accuracy && !options->width &&
+      !options->is_blank && !options->is_dot) {
+    result++;
+  }
+  if (options->is_blank || options->is_plus || number <= 0) {
     options->flag_size = 1;
     result++;
   }
-
-  if (result == 0 && copy_num == 0 && !options->width && !options->accuracy &&
-      !options->is_blank && !options->is_dot)
-    result++;
-
   return result;
 }
 
-int decimal_handle_flags(char *string_for_number, Options options,
-                         s21_size_t size, int i, long int number) {
+// записываем число задом наперёд
+int decimal_to_string(long int number, Options options, char *string_for_number,
+                      s21_size_t size) {
+  int flag = 0;
+  int flag_zero = 0;
+
+  if (number < 0) {
+    flag = 1;
+    number = -number;
+  }
+  int i = 0;
+  long int copy_num = number;
+
+  // запись числа в буферный массив, если число == 0
+  if (copy_num == 0) {
+    char sym = copy_num % options.number_system + '0';
+    string_for_number[i] = sym;
+    i++;
+    size--;
+    copy_num /= 10;
+  }
+
+  // запись числа в буферный массив, если число не 0
+  while (copy_num != 0 && string_for_number != 0 && size != 0) {
+    char sym = convert_num_to_char(copy_num % options.number_system, options.upper_case);
+    string_for_number[i] = sym;
+    i++;
+    size--;
+    copy_num /= 10;
+  }
+
+  if (flag) {
+    number = -number;
+  }
+
+  // проверка на то, можем ли мы применить флаг 0
+  if (options.accuracy - i > 0) {  // если точность больше чем ширина
+    options.accuracy -= i;
+    options.is_zero = 1;
+  } else {
+    flag_zero = 1;
+  }
+  // если не осталось места под нули
+  if (size == 1 && options.is_zero == 1 && options.flag_size == 1) {
+    options.is_zero = 0;
+  }
+  // обработка флага  0
   while (options.is_zero && string_for_number &&
-         (size - options.flag_size > 0) && (options.accuracy || number < 0)) {
-    if (size == 1 && options.flag_size == 1)
+         (size - options.flag_size - flag > 0) &&
+         (options.accuracy || flag_zero)) {
+    if ((size == 1 && options.flag_size == 1)) {
       break;
+    }
     string_for_number[i] = '0';
     i++;
     size--;
     options.accuracy--;
   }
-    if (options.is_blank && number >= 0 && size) {
-      string_for_number[i] = ' ';
-      i++;
-      size--;
-    }
+  // обработка флагов +, -, пробел
+  if (options.is_blank && number >= 0 && size) {
+    string_for_number[i] = ' ';
+    i++;
+    size--;
+  }
+  if (number < 0 && size) {
+    string_for_number[i] = '-';
+    i++;
+    size--;
+  }
+  if (number >= 0 && options.is_plus && size) {
+    string_for_number[i] = '+';
+    i++;
+    size--;
+  }
 
-    if (number < 0 && size) {
-      string_for_number[i] = '-';
-      i++;
-      size--;
-    }
-    if (number > 0 && options.is_plus && size) {
-      string_for_number[i] = '+';
-      i++;
-      size--;
-    }
-  
-
-  if (size > 0 && !options.is_minus) {
+  // обработка ситуации, когда осталось свободное место в строке
+  if (size > 0 && options.is_minus == 0) {
     while ((size - options.flag_size > 0) && string_for_number) {
       string_for_number[i] = ' ';
       i++;
@@ -228,80 +310,154 @@ int decimal_handle_flags(char *string_for_number, Options options,
   return i;
 }
 
-int decimal_to_string(long int number, Options options, char *string_for_number,
-                      s21_size_t size) {
-  int change_sign = 0;
 
-  if (number < 0) {
-    change_sign = 1;
-    number = -number;
-  }
+//////////////////////////////////////////
+// char *print_decimal(char *str, Options options, va_list *arguments) {
+//   long int number = 0;
+//   // записываем число в number
+//   if (options.addit_type == 'l') {
+//     number = (long int)va_arg(*arguments, long int);
+//   } else if (options.addit_type == 'h') {
+//     number = (short)va_arg(*arguments, int);
+//   } else {
+//     number = (int)va_arg(*arguments, int);
+//   }
+//     s21_size_t size = get_size_decimal(number, &options);
+//   char *string_for_number = malloc(sizeof(char) * size);
+//   if (string_for_number) {
+//     int i = decimal_to_string(number,options, string_for_number, size);
+//     str = reverse_and_pad(str, string_for_number, i, options.width);
+//   }
+//   if (string_for_number) {
+//     free(string_for_number);
+//   }
+//   *str = '\0';
+//   return str;
+// }
 
-  int i = 0;
-  long int number_copy = number;
+// s21_size_t get_size_decimal(long int number, Options *options) {
+//   s21_size_t result = 0;
+//   long int copy_num = number;
 
-  if ((number_copy == 0 &&
-       (options.accuracy || options.width || options.is_blank)) ||
-      (number_copy == 0 && !options.accuracy && !options.width &&
-       !options.is_blank && !options.is_dot)) {
-    char c = convert_num_to_char(number_copy % options.number_system,
-                                 options.upper_case);
-    string_for_number[i] = c;
-    i++;
-    size--;
-  }
+//   if (copy_num < 0) {
+//     copy_num = -number;
+//   }
 
-  while (number_copy != 0 && string_for_number && size) {
-    char c = convert_num_to_char(number_copy % options.number_system,
-                                 options.upper_case);
-    string_for_number[i] = c;
-    i++;
-    size--;
-    number_copy /= 10;
-  }
+//   while (copy_num > 0) {
+//     copy_num /= 10;
+//     result++;
+//   }
 
-  if (change_sign == 1)
-    number = -number;
+//   if (copy_num == 0 && result == 0 &&
+//       (options->is_blank && options->width && options->accuracy)) {
+//     result++;
+//   }
 
-  if (options.accuracy - i > 0) {
-    options.accuracy -= i;
-    options.is_zero = 1;
-  } else
-    change_sign = 1;
+//   if ((s21_size_t)options->width > result)
+//     result = options->width;
+//   if ((s21_size_t)options->accuracy > result)
+//     result = options->accuracy;
 
-  if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
-    options.is_zero = 0;
+//   if (options->is_blank || options->is_plus || number < 0) {
+//     options->flag_size = 1;
+//     result++;
+//   }
 
-  i = decimal_handle_flags(string_for_number, options, size, i, number);
-  return i;
-}
+//   if (result == 0 && copy_num == 0 && !options->width && !options->accuracy &&
+//       !options->is_blank && !options->is_dot)
+//     result++;
 
-char *print_decimal(char *str, Options options, va_list *arg) {
-  long int number = 0;
+//   return result;
+// }
 
-  char addit = options.addit_type;
-  if (addit == 'l')
-    number = (long int)va_arg(*arg, long int);
-  else if (addit == 'h')
-    number = (short)va_arg(*arg, int);
-  else
-    number = (int)va_arg(*arg, int);
+// // записываем число задом наперёд
+// int decimal_to_string(long int number, Options options, char *string_for_number,
+//                       s21_size_t size) {
+//   int change_sign = 0;
+// int flag_zero = 0;
 
-  s21_size_t size = get_size_decimal(number, &options);
-  char *string_for_number = malloc(sizeof(char) * size);
+//   if (number < 0) {
+//     change_sign = 1;
+//     number = -number;
+//   }
 
-  if (string_for_number) {
-    int i = decimal_to_string(number, options, string_for_number, size);
-    // reverse
-    str = reverse_and_pad(str, string_for_number, i, options.width);
-  }
-  if (string_for_number)
-    free(string_for_number);
+//   int i = 0;
+//   long int number_copy = number;
 
-   *str = '\0';
-  return str;
-}
-// end decimal
+//   if (number_copy == 0) {
+//     char c = convert_num_to_char(number_copy % options.number_system,
+//                                  options.upper_case);
+//     string_for_number[i] = c;
+//     i++;
+//     size--;
+//     // number_copy /= 10; //???
+//   }
+
+//   while (number_copy != 0 && string_for_number && size) {
+//     char c = convert_num_to_char(number_copy % options.number_system,
+//                                  options.upper_case);
+//     string_for_number[i] = c;
+//     i++;
+//     size--;
+//     number_copy /= 10;
+//   }
+
+//   if (change_sign == 1)
+//     number = -number;
+
+//   if (options.accuracy - i > 0) {
+//     options.accuracy -= i;
+//     options.is_zero = 1;
+//   } else
+//     flag_zero = 1;
+
+//   if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
+//     options.is_zero = 0;
+
+//   i = decimal_handle_flags(string_for_number, options, size, i, number, change_sign, flag_zero);
+//   return i;
+
+// }
+
+// int decimal_handle_flags(char *string_for_number, Options options,
+//                          s21_size_t size, int i, long int number, int change_sign, int flag_zero) {
+//   while (options.is_zero && string_for_number &&
+//          (size - options.flag_size - change_sign > 0) &&
+//          (options.accuracy || flag_zero)) {
+//     if ((size == 1 && options.flag_size == 1)) {
+//       break;
+//     }
+//     string_for_number[i] = '0';
+//     i++;
+//     size--;
+//     options.accuracy--;
+//   }
+//   if (options.is_blank && number >= 0 && size) {
+//     string_for_number[i] = ' ';
+//     i++;
+//     size--;
+//   }
+//   if (number < 0 && size) {
+//     string_for_number[i] = '-';
+//     i++;
+//     size--;
+//   }
+//   if (number > 0 && options.is_plus && size) {
+//     string_for_number[i] = '+';
+//     i++;
+//     size--;
+//   }
+
+//   if (size > 0 && options.is_minus == 0) {
+//     while ((size - options.flag_size > 0) && string_for_number) {
+//       string_for_number[i] = ' ';
+//       i++;
+//       size--;
+//     }
+//   }
+//   return i;
+// }
+// ///////////////////////////////////////
 
 char convert_num_to_char(int num, int upper_case) {
   char flag = '0';
@@ -341,7 +497,7 @@ char* reverse_and_pad(char *str, const char *string_for_number, int length, int 
   while (length < width) {
     *str = ' ';
     str++;
-    //length++;
+    length++;
   }
   return str;
 }
@@ -1088,9 +1244,34 @@ char *print_p(char *str, Options *options, va_list *arg) {
 }
 
 int main() {
-    char buffer[100];
+  char buffer[200];
+  char str1[100];
+  char str2[100];
+  // int val = 012;
+  // int val2 = -017;
+  // int val3 = 07464;
+  //     int d1 =  s21_sprintf(str1, "%d Test %d Test %d", val, val2, val3);
+  //     int d2 =  sprintf(str2, "%d Test %d Test %d", val, val2, val3);
+  //     printf("-%d-\n", d1);
+  //     printf("-%d-\n", d2);
 
-    //Specifier: c
+  char *str3 = "%i Test %3.i Test %5.7i TEST %10i %#i %-i %+i %.i % .i";
+   int val = 0;
+          sprintf(str1, str3, val, val, val, val, val, val, val, val, val, val),
+      s21_sprintf(str2, str3, val, val, val, val, val, val, val, val, val, val);
+      printf("%s-\n", str1);
+      printf("%s-\n", str2);
+
+//  str3 = "%i Test %i Test %i";
+//    val = 3015;
+//    val2 = 712;
+//    val3 = 99;
+//   sprintf(str1, str3, val, val2, val3),
+//   s21_sprintf(str2, str3, val, val2, val3);
+//  printf("-%s-\n", str1);
+//       printf("-%s-\n", str2);
+
+//     //Specifier: c
     char charValue = 'A';
     s21_sprintf(buffer, "Specifier: %%c - Character: %c", charValue);
     printf("Formatted string: %s\n", buffer);
@@ -1128,7 +1309,7 @@ int main() {
     printf("Formatted string: %s\n", buffer);
 
     //sprintf(buffer, "Specifier: %%u - Unsigned Integer: % u", uintValue);
-    printf("Formatted string: %s\n", buffer);
+    // printf("Formatted string: %s\n", buffer);
     
         // Specifier: x (hexadecimal)
     int hexValue = 0x2A;  // Hex representation of 42 in decimal
@@ -1154,8 +1335,8 @@ sprintf(buffer, "Specifier: %%o - Octal: %o", octalValue);
     printf("Formatted string: %s\n", buffer);
 
     // Flags: -
-    // s21_sprintf(buffer, "Flags: %%-8x - Left-justified Hexadecimal: %-8x", hexValue);
-    // printf("Formatted string: %s\n", buffer);
+     s21_sprintf(buffer, "Flags: %%-8x - Left-justified Hexadecimal: -%-8x-", hexValue);
+     printf("Formatted string: %s\n", buffer);
 
      sprintf(buffer, "Flags: %%-8x - Left-justified Hexadecimal: -%-8x-", hexValue);
     printf("Formatted string: %s\n", buffer);
@@ -1244,39 +1425,3 @@ sprintf(buffer, "Specifier: %%o - Octal: %o", octalValue);
 
   return 0;
 }
-
-//если О и # - число вместе с 0
-//если x и # - число вместе с 0x
-//если x и # - число вместе с 0X
-
-// s21_size_t get_size_unsigned_decimal(long int number, Options* options) {
-//     s21_size_t result = 0;
-//     long int copy_num = number;
-
-//     if(copy_num < 0) {
-//         copy_num = -number;
-//     }
-
-//     while(copy_num > 0) {
-//         copy_num /= 10;
-//         result++;
-//     }
-
-//     if(copy_num == 0 && result == 0 && (options->is_blank && options->width
-//     && options->accuracy)) {
-//         result++;
-//     }
-
-//     if((s21_size_t)options->width > result) result = options->width;
-//     if((s21_size_t)options->accuracy > result) result = options->accuracy;
-
-//     if(options->is_blank || options->is_plus || number < 0) {
-//         options->flag_size = 1;
-//         result++;
-//     }
-
-//     if(result == 0 && copy_num == 0 && !options->width && !options->accuracy
-//     && !options->is_blank && !options->is_dot) result++;
-
-//     return result;
-// }

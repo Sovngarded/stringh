@@ -2,6 +2,7 @@
 
 // One parameter signed_i
 START_TEST(sprintf_1_signed_i) {
+  printf("first ");
   char str1[100] = "";
   char str2[100] = "";
   char *str3 = "Test %d Test";
@@ -27,6 +28,7 @@ END_TEST
 
 // Three decimal parameters
 START_TEST(sprintf_3_signed_i) {
+  printf("3 ");
   char str1[100];
   char str2[100];
   char *str3 = "%i Test %i Test %i";
@@ -41,6 +43,7 @@ END_TEST
 
 // Different sizes
 START_TEST(sprintf_4_signed_i) {
+  printf("4 ");
   char str1[100];
   char str2[100];
   char *str3 = "%li Test %li Test %hi GOD %hi";
@@ -56,6 +59,7 @@ END_TEST
 
 // Different width
 START_TEST(sprintf_5_signed_i) {
+  printf("5 ");
   char str1[100];
   char str2[100];
   char *str3 = "%3i Test %5i Test %10i";
@@ -70,6 +74,8 @@ END_TEST
 
 // Different precision and width
 START_TEST(sprintf_6_signed_i) {
+  printf("6 ");
+
   char str1[200];
   char str2[200];
   char *str3 = "%6.5i Test %.23i Test %3.i TEST %.i";
@@ -85,6 +91,8 @@ END_TEST
 
 // Minus flag
 START_TEST(sprintf_7_signed_i) {
+  printf("7 ");
+
   char str1[200];
   char str2[200];
   char *str3 = "%-10.5i Test %-.8i Test %-7i TEST %-.i";
@@ -100,6 +108,8 @@ END_TEST
 
 // Zeroes
 START_TEST(sprintf_8_signed_i) {
+  printf("8 ");
+
   char str1[200];
   char str2[200];
   char *str3 = "%0i Test %0.i Test %0.0i TEST %0i GOD %.i";
@@ -116,6 +126,8 @@ END_TEST
 
 // Pluses
 START_TEST(sprintf_9_signed_i) {
+  printf("9 ");
+
   char str1[200];
   char str2[200];
   char *str3 = "%+i Test %+3.i Test %+5.7i TEST %+10i";
@@ -131,6 +143,8 @@ END_TEST
 
 // Zero vals
 START_TEST(sprintf_10_signed_i) {
+  printf("10 ");
+
   char str1[200];
   char str2[200];
   char *str3 = "%i Test %3.i Test %5.7i TEST %10i %#i %-i %+i %.i % .i";
@@ -145,6 +159,8 @@ END_TEST
 
 // Spaces
 START_TEST(sprintf_11_signed_i) {
+  printf("11 ");
+
   char str1[200];
   char str2[200];
   char *str3 = "% i Test % 3.i Test % 5.7i TEST % 10i GOD %.i";
@@ -161,6 +177,8 @@ END_TEST
 
 // Plus
 START_TEST(sprintf_12_signed_i) {
+  printf("12 ");
+
   char str1[200];
   char str2[200];
   char *str3 = "%+i Test %+3.i Test %+5.7i TEST %+10i GOD %+.i";
@@ -177,6 +195,8 @@ END_TEST
 
 // Hash
 START_TEST(sprintf_13_signed_i) {
+  printf("13 ");
+
   char str1[200];
   char str2[200];
   char *str3 = "%#i Test %#3i Test %#5.7i TEST %#.7i Oof %#.i";
@@ -193,6 +213,8 @@ END_TEST
 
 // ZERO flag
 START_TEST(sprintf_14_signed_i) {
+  printf("14 ");
+
   char str1[200];
   char str2[200];
   char *str3 = "%0d Test %06i Test %05.7i TEST %0.7i Oof %0.i";
@@ -209,6 +231,8 @@ END_TEST
 
 // Asterisk
 START_TEST(sprintf_15_signed_i) {
+  printf("15 ");
+
   char str1[200];
   char str2[200];
   char *str3 = "%*i Test %-*i Test %*.*i TEST %.*i";
@@ -231,6 +255,8 @@ END_TEST
 
 // Simple extra test
 START_TEST(sprintf_16_signed_i) {
+  printf("16 ");
+
   char str1[100] = "";
   char str2[100] = "";
   char *str3 = "%i";
@@ -241,6 +267,8 @@ START_TEST(sprintf_16_signed_i) {
 END_TEST
 
 START_TEST(sprintf_17_signed_i) {
+  printf("17 ");
+  
   char str1[200];
   char str2[200];
   char *str3 = "%- i Test %- 15i sdasda %- 15i sdsad %- i";
