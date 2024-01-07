@@ -233,7 +233,8 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
   long int copy_num = number;
 
   // запись числа в буферный массив, если число == 0
-  if (copy_num == 0) {
+ if (copy_num == 0 && !options.accuracy &&
+       !options.is_blank && !options.is_dot) {
     char sym = copy_num % options.number_system + '0';
     string_for_number[i] = sym;
     i++;
@@ -267,7 +268,7 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
   }
   // обработка флага  0
   while (options.is_zero && string_for_number &&
-         (size - options.flag_size - flag > 0) &&
+         (size - options.flag_size > 0) &&
          (options.accuracy || flag_zero)) {
     if ((size == 1 && options.flag_size == 1)) {
       break;
@@ -533,12 +534,12 @@ s21_size_t get_size_unsigned_decimal(unsigned long int number,
   if ((s21_size_t)options->accuracy > result) {
     result = options->accuracy;
   }
-  if (options->is_blank || options->is_plus) {
-    options->flag_size = 1;
-    result++;
-  }
   if (result == 0 && copy_num == 0 && !options->accuracy && !options->width &&
       !options->is_blank && !options->is_dot) {
+    result++;
+  }
+   if (options->is_blank || options->is_plus) {
+    options->flag_size = 1;
     result++;
   }
   if (options->is_hash && options->number_system == 16) result += 2;
@@ -797,12 +798,13 @@ s21_size_t get_size_double(Options *options, long double number) {
   if ((s21_size_t)options->accuracy > result) {
     result += options->accuracy;
   }
-  if (options->is_blank || options->is_plus || number < 0.0000000000001) {
-    options->flag_size = 1;
-    result++;
-  }
+ 
   if (result == 0 && copy_num == 0 && !options->accuracy && !options->width &&
       !options->is_blank && !options->is_dot) {
+    result++;
+  }
+   if (options->is_blank || options->is_plus || number < 0.0000000000001) {
+    options->flag_size = 1;
     result++;
   }
   return result;

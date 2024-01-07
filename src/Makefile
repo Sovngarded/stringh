@@ -12,7 +12,11 @@ FILE_TESTS =./tests/test_me.c ./tests/test_memchr.c ./tests/test_memcmp.c ./test
 		./tests/test_strstr.c ./tests/test_strcspn.c ./tests/test_strerror.c ./tests/test_strpbrk.c \
 		./tests/test_strcpy.c ./tests/test_insert.c ./tests/test_to_lower.c \
 		./tests/test_to_upper.c ./tests/test_trim.c ./tests/test_sprintf_pointer.c \
-		./tests/test_sprintf_percent.c ./tests/test_sprintf_n.c ./tests/test_sprintf_i.c ./tests/test_sprintf_d.c
+		./tests/test_sprintf_percent.c ./tests/test_sprintf_n.c ./tests/test_sprintf_i.c ./tests/test_sprintf_d.c \
+		./tests/test_sprintf_string.c ./tests/test_sprintf_f.c ./tests/test_sprintf_unsigned.c \
+		./tests/test_sprintf_e.c ./tests/test_sprintf_g.c ./tests/test_sprintf_octal.c ./tests/test_sprintf_hex1.c \
+		./tests/test_sprintf_hex2.c 
+		
 
 TARGET=s21_string.a
 TEST_FLAGS = -lcheck -lm -lsubunit
@@ -23,7 +27,7 @@ $(TARGET):
 	$(CC) ${CFLAGS} -c ${FILES}
 	ar rc libs21_string.a s21*.o
 	ranlib libs21_string.a
-	cp libs21_string.a s21_string.a
+	cp libs21_string.a s21_string.as
 
 test: $(TARGET)
 	$(CC) ${CFLAGS} ${FILES} ${FILE_TESTS} s21_string.h s21_sprintf.h ${TEST_FLAGS} -o s21_string --coverage
