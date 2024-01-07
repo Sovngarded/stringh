@@ -5,9 +5,11 @@
 
 #if defined(__APPLE__) || defined(__MACH__)
 #define S21_ERRLIST_SIZE 107
+#define ERROR "Unknown error:"
 #endif
 #if defined(__linux__)
 #define S21_ERRLIST_SIZE 134
+#define ERROR "Unknown error"
 #endif
 
 #if defined(__APPLE__) || defined(__MACH__)
@@ -266,7 +268,7 @@ char *s21_strerror(int errnum) {
   static char res[256] = {'\0'};
 
   if (errnum < 0 || errnum >= S21_ERRLIST_SIZE)
-    s21_sprintf(res, "Unknown error %d", errnum);
+    s21_sprintf(res, "%s %d", ERROR, errnum);
   else
     s21_strcpy(res, s21_sys_errlist[errnum]);
 
