@@ -532,6 +532,10 @@ s21_size_t get_size_unsigned_decimal(unsigned long int number,
     copy_num /= options->number_system;
     result++;
   }
+   if (copy_num == 0 && result == 0 &&
+      (!options->accuracy && !options->width && options->is_blank && options->is_dot)) {
+    return result;
+  }
   if (copy_num == 0 && result == 0 &&
       (options->accuracy || options->width || options->is_blank)) {
     result++;
@@ -552,6 +556,7 @@ s21_size_t get_size_unsigned_decimal(unsigned long int number,
   }
   if (options->is_hash && options->number_system == 16) result += 2;
   if (options->is_hash && options->number_system == 8) result++;
+
   return result;
 }
 
@@ -591,7 +596,7 @@ int unsigned_decimal_handle_flags(char *string_for_number, Options options,
     }
     
   if (size > 0 && options.is_minus == 0) {
-    while ((size - options.flag_size > 0 && size > 0) && string_for_number && (options.is_blank != 1 && options.width != 0)) {
+    while ((size - options.flag_size > 0 && size > 0) && string_for_number && (options.is_blank == 1 || options.is_plus == 1 || options.width != 0))/*&& (options.is_blank != 1 && options.width != 0)*/ {
       string_for_number[i] = ' ';
       i++;
       size--;
@@ -637,8 +642,8 @@ int i = 0;
   }
 
  while (copy_num && string_for_number && size) {
-    if (flag_minus == 1 && options.is_minus) {
-      while (((int)size - sym_place > 0) &&
+    if (flag_minus == 1 && options.is_minus && options.width > options.accuracy) {
+      while (((int)size - sym_place - 1 > 0) &&
              (!options.is_hash && options.number_system != 16)) {
         string_for_number[i] = ' ';
         i++;
@@ -652,11 +657,14 @@ int i = 0;
     copy_num /= options.number_system;
   }
 
-  if (options.accuracy - i > 0) {
-    options.accuracy -= i;
+  if (options.accuracy - sym_place > 0) {
+    options.accuracy -= sym_place;
     options.is_zero = 1;
-  } else flag = 1;
-
+  }  else flag = 1;
+  // else if (options.is_minus && options.accuracy - (i - options.width))
+  // {
+  //   /* code */
+  // }
   if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
     options.is_zero = 0;
 
@@ -1250,14 +1258,23 @@ char *print_p(char *str, Options *options, va_list *arg) {
 
 int main() {
   // char buffer[200];
-  char str1[400];
-  char str2[400];
-  char *str3 = "test: %015f!\ntest: %-026f!\ntest: %+018f!";
-  double num = -947.6785643;
-  sprintf(str1, str3, num, num, num);
-  s21_sprintf(str2, str3, num, num, num);
-     printf("%s\n\n", str1);
-      printf("%s\n", str2);
+  // char str1[400];
+  // char str2[400];
+  // char *str3 = "test: %015f!\ntest: %-026f!\ntest: %+018f!";
+  // double num = -947.6785643;
+  // sprintf(str1, str3, num, num, num);
+  // s21_sprintf(str2, str3, num, num, num);
+  //    printf("%s\n\n", str1);
+  //     printf("%s\n", str2);
+
+  char str1[200];
+  char str2[200];
+  char *str3 = "%u Test %3.u Test %5.7u TEST 1%10u 2%#u 3%-u 4%+u 5%.u 6% .u7";
+  unsigned int val = 0;
+  sprintf(str1, str3, val, val, val, val, val, val, val, val, val);
+  s21_sprintf(str2, str3, val, val, val, val, val, val, val, val, val);
+  printf("%s-\n", str1);
+  printf("%s-\n", str2);
   // char str1[1024] = "";
   // char str2[1024] = "";
   // int vall = -75;

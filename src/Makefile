@@ -19,7 +19,7 @@ FILE_TESTS =./tests/test_me.c ./tests/test_memchr.c ./tests/test_memcmp.c ./test
 		
 
 TARGET=s21_string.a
-TEST_FLAGS = -lcheck -lm -lsubunit
+TEST_FLAGS = -lcheck -lm #-lsubunit
 
 all: gcov_report
 
