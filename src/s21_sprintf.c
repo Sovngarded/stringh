@@ -899,7 +899,7 @@ s21_size_t get_size_double(Options *options, long double number) {
   if ((int)copy_num == 0) result++;
   if (copy_num < 0) {
     copy_num = -copy_num;
-    //result++;
+    result++;
   }
   while (copy_num >= 1) {
     copy_num /= 10;
@@ -922,7 +922,7 @@ s21_size_t get_size_double(Options *options, long double number) {
       !options->is_blank && !options->is_dot) {
     result++;
   }
-   if (options->is_blank || options->is_plus || number < 0.0000000000001) {
+   if (options->is_blank || options->is_plus || (number < 0.0000000000001 && number != 0)) {
     options->flag_size = 1;
     result++;
   }
@@ -969,9 +969,10 @@ s21_size_t add_parts_of_num_to_string(char *string, Options options, int accurac
                                long double integer_part) {
   long double copy_fractional_part = fractional_part;
 
-  if (fractional_part + 0.000000000000001 >= 1) {
+  if (fractional_part + 0.000001 >= 1) { //EDIT HERE
     fractional_part = 0;
     integer_part += 1;
+    size++;
   }
 
   for (int j = 0; j < 15; j++) {
@@ -1065,7 +1066,7 @@ int double_handle_flags(char *string_for_number, Options options,
     i++;
     size--;
   }
-  if (number < 0.0000000000001 && size && !options.e) {
+  if (number < 0.0000000000001 && size && !options.e && number != 0) {
     string_for_number[i] = '-';
     if (options.e && options.flag_size && options.width) options.flag_size = 0;
     i++;
@@ -1077,7 +1078,7 @@ int double_handle_flags(char *string_for_number, Options options,
     i++;
     size--;
   }
-  if (number > 0.0000000000001 && options.is_plus && size) {
+  if ( (number > 0.0000000000001 || number == 0) && options.is_plus && size) {
     string_for_number[i] = '+';
     i++;
     size--;

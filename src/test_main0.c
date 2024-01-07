@@ -796,7 +796,7 @@ s21_size_t get_size_double(Options *options, long double number) {
   if ((int)copy_num == 0) result++;
   if (copy_num < 0) {
     copy_num = -copy_num;
-    //result++;
+    result++;
   }
   while (copy_num >= 1) {
     copy_num /= 10;
@@ -820,7 +820,7 @@ s21_size_t get_size_double(Options *options, long double number) {
     result++;
   }
 
-  if (options->is_blank || options->is_plus || number <= 0.0000000000001) {
+  if (options->is_blank || options->is_plus || (number < 0.0000000000001 && number != 0) ) {
     options->flag_size = 1;
     result++;
   }
@@ -866,8 +866,7 @@ s21_size_t add_parts_of_num_to_string(char *string, Options options, int accurac
                                long double fractional_part,
                                long double integer_part) {
   long double copy_fractional_part = fractional_part;
-
-  if (fractional_part + 0.000000000000001 >= 1) {
+  if (fractional_part + 0.000001 >= 1) {
     fractional_part = 0;
     integer_part += 1;
   }
@@ -949,8 +948,7 @@ int add_sym_from_double_to_str(char *str_to_double, Options options, int accuran
 int double_handle_flags(char *string_for_number, Options options,
                         s21_size_t size, int i, long double number) {
     while (options.is_zero && string_for_number &&
-           (size - options.flag_size > 0) /*&&
-           (options.accuracy || options.flag_size)*/)  {
+           (size - options.flag_size > 0))  {
     if (size - 1  == 1 && options.flag_size == 1)
       break;
     string_for_number[i] = '0';
@@ -964,19 +962,14 @@ int double_handle_flags(char *string_for_number, Options options,
     i++;
     size--;
   }
-  if (number < 0.0000000000001 && size && !options.e) {
+  if (number < 0.0000000000001 && number != 0 && size && !options.e) {
     string_for_number[i] = '-';
     if (options.e && options.flag_size && options.width) options.flag_size = 0;
     i++;
     size--;
   }
-  if (number < 0 && size && options.e) {
-    string_for_number[i] = '-';
-    if (options.e && options.flag_size && options.width) options.flag_size = 0;
-    i++;
-    size--;
-  }
-  if (number > 0.0000000000001 && options.is_plus && size) {
+
+  if ( (number > 0.0000000000001 || number == 0) && options.is_plus && size) {
     string_for_number[i] = '+';
     i++;
     size--;
@@ -1270,11 +1263,11 @@ int main() {
 
   char* str3 = "test: %.1Lf!\ntest: %.2Lf!\ntest: %.3Lf!";
   long double num = -9999.99999;
-  sprintf(str1, str3, num, num, num);
-  s21_sprintf(str2, str3, num, num, num);
-  printf("%s-\n", str1);
-  printf("%s-\n", str2);
-  printf("\n");
+  // sprintf(str1, str3, num, num, num);
+  // s21_sprintf(str2, str3, num, num, num);
+  // printf("%s-\n", str1);
+  // printf("%s-\n", str2);
+  // printf("\n");
 
   str3 = "test: %.10Lf!\ntest: %.6Lf!\ntest: %.Lf!";
   num = -9999.99999;
