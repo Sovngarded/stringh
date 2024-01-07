@@ -899,7 +899,7 @@ s21_size_t get_size_double(Options *options, long double number) {
   if ((int)copy_num == 0) result++;
   if (copy_num < 0) {
     copy_num = -copy_num;
-    result++;
+    //result++;
   }
   while (copy_num >= 1) {
     copy_num /= 10;
@@ -1051,9 +1051,8 @@ int add_sym_from_double_to_str(char *str_to_double, Options options, int accuran
 int double_handle_flags(char *string_for_number, Options options,
                         s21_size_t size, int i, long double number) {
     while (options.is_zero && string_for_number &&
-           (size - options.flag_size > 0) &&
-           (options.accuracy || options.flag_size))  {
-    if (size == 1 && options.flag_size == 1)
+           (size - options.flag_size > 0))  {
+    if (size - 1 == 1 && options.flag_size == 1)
       break;
     string_for_number[i] = '0';
     i++;

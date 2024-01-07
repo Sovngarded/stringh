@@ -820,10 +820,9 @@ s21_size_t get_size_double(Options *options, long double number) {
     result++;
   }
 
-  if (options->is_blank || options->is_plus || number < 0.0000000000001) {
+  if (options->is_blank || options->is_plus || number <= 0.0000000000001) {
     options->flag_size = 1;
-    if(!options->width)
-        result++;
+    result++;
   }
   return result;
 }
@@ -950,9 +949,9 @@ int add_sym_from_double_to_str(char *str_to_double, Options options, int accuran
 int double_handle_flags(char *string_for_number, Options options,
                         s21_size_t size, int i, long double number) {
     while (options.is_zero && string_for_number &&
-           (size - options.flag_size > 0) &&
-           (options.accuracy || options.flag_size))  {
-    if (size == 1 && options.flag_size == 1)
+           (size - options.flag_size > 0) /*&&
+           (options.accuracy || options.flag_size)*/)  {
+    if (size - 1  == 1 && options.flag_size == 1)
       break;
     string_for_number[i] = '0';
     i++;
@@ -1266,15 +1265,40 @@ int main() {
   // s21_sprintf(str2, str3, num, num, num);
   //    printf("%s\n\n", str1);
   //     printf("%s\n", str2);
+  char str1[400];
+  char str2[400];
 
-  char str1[200];
-  char str2[200];
-  char *str3 = "%u Test %3.u Test %5.7u TEST 1%10u 2%#u 3%-u 4%+u 5%.u 6% .u7";
-  unsigned int val = 0;
-  sprintf(str1, str3, val, val, val, val, val, val, val, val, val);
-  s21_sprintf(str2, str3, val, val, val, val, val, val, val, val, val);
+  char* str3 = "test: %.1Lf!\ntest: %.2Lf!\ntest: %.3Lf!";
+  long double num = -9999.99999;
+  sprintf(str1, str3, num, num, num);
+  s21_sprintf(str2, str3, num, num, num);
   printf("%s-\n", str1);
   printf("%s-\n", str2);
+  printf("\n");
+
+  str3 = "test: %.10Lf!\ntest: %.6Lf!\ntest: %.Lf!";
+  num = -9999.99999;
+  sprintf(str1, str3, num, num, num);
+                   s21_sprintf(str2, str3, num, num, num);
+printf("%s-\n", str1);
+  printf("%s-\n", str2);
+  printf("\n");
+
+  str3 = "test: %.1Lf!\ntest: %.2Lf!\ntest: %.3Lf!";
+  num = 000000000000000.00000000000;
+  sprintf(str1, str3, num, num, num);
+                   s21_sprintf(str2, str3, num, num, num);                 
+printf("%s-\n", str1);
+  printf("%s-\n", str2);
+  printf("\n");
+
+  str3 = "test: %.6Lf!\ntest: %.Lf\ntest: %+ 0Lf!!";
+ num = 000000000000000.00000000000;
+ sprintf(str1, str3, num, num, num);
+                   s21_sprintf(str2, str3, num, num, num);
+printf("%s-\n", str1);
+  printf("%s-\n", str2);
+  printf("\n");
   // char str1[1024] = "";
   // char str2[1024] = "";
   // int vall = -75;
