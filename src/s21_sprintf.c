@@ -41,7 +41,10 @@ const char *set_options(Options *options, const char *format, va_list *arg) {
 
   if (*format == '.') {
     options->is_dot = 1;
-    options->is_zero = 0;
+    if (options->width && !options->accuracy && options->is_zero)
+      options->is_zero = 1; 
+    else
+      options->is_zero = 0;
     format++;
     format = get_width(format, &options->accuracy, arg);
   }
@@ -1180,7 +1183,7 @@ s21_size_t get_size_eg(Options *option, long double number) {
     if ((long)int_part > 0) {
       size--;
     }
-    if (copy_num <= 0.000000000001) {
+    if (copy_num <= 0.000000000001 ) {
       copy_num = -copy_num;
     }
     float_part = modfl(copy_num, &int_part);
