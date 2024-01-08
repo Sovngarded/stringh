@@ -550,7 +550,7 @@ s21_size_t get_size_unsigned_decimal(unsigned long int number,
     result++;
   }
   if (options->is_hash && options->number_system == 16) result += 2;
-  if (options->is_hash && options->number_system == 8) result++;
+  if (options->is_hash && options->number_system == 8 && options->accuracy == 0) result++;
   return result;
 }
 
@@ -573,7 +573,7 @@ int unsigned_decimal_handle_flags(char *string_for_number, Options options,
       i++;
       size--;
     } else if (options.is_hash && options.number_system == 16 &&
-               options.upper_case && size > 1) {
+               options.upper_case && size > 1 && number != 0) {
       string_for_number[i] = 'X';
       i++;
       size--;
@@ -581,7 +581,7 @@ int unsigned_decimal_handle_flags(char *string_for_number, Options options,
       i++;
       size--;
     } else if (options.is_hash && options.number_system == 16 &&
-               !options.upper_case && size > 1) {
+               !options.upper_case && size > 1 && number != 0) {
       string_for_number[i] = 'x';
       i++;
       size--;
@@ -611,7 +611,7 @@ int i = 0;
   int sym_place = 0; 
 
   while (copy_num_2 > 0) {
-    copy_num_2 /= 10;
+    copy_num_2 /= options.number_system;
     sym_place++;
   }
   if ((int)size - sym_place > 0) {
@@ -669,116 +669,6 @@ int i = 0;
 }
 
 
-// int unsigned_decimal_handle_flags(char *string_for_number, Options options,
-//                          s21_size_t size, int i, long int number, int flag) {
-
-//         while (options.is_zero && string_for_number &&
-//          (size - options.flag_size > 0) && (options.accuracy || flag)) {
-//     if ( (size == 1 && options.flag_size == 1))
-//       break;
-//     string_for_number[i] = '0';
-//     i++;
-//     size--;
-//     options.accuracy--;
-//   }
-
-//     if (options.is_hash && options.number_system == 8 && size > 0 && number != 0) {
-//       string_for_number[i] = '0';
-//       i++;
-//       size--;
-//     } else if (options.is_hash && options.number_system == 16 &&
-//                options.upper_case && size > 1) {
-//       string_for_number[i] = 'X';
-//       i++;
-//       size--;
-//       string_for_number[i] = '0';
-//       i++;
-//       size--;
-//     } else if (options.is_hash && options.number_system == 16 &&
-//                !options.upper_case && size > 1) {
-//       string_for_number[i] = 'x';
-//       i++;
-//       size--;
-//       string_for_number[i] = '0';
-//       i++;
-//       size--;
-//     }
-    
-//   if (size > 0 && options.is_minus == 0) {
-//     while ((size - options.flag_size > 0 && size > 0) && string_for_number && options.is_blank == 1) {
-//       string_for_number[i] = ' ';
-//       i++;
-//       size--;
-//     }
-//   }
-//   return i;
-// }
-
-// int unsigned_decimal_to_string(char *string_for_number, Options options,
-//                                unsigned long int number, s21_size_t size) {
-
-// int i = 0;
-//   int flag = 0;
-//   unsigned long int copy_num = number;
-//   unsigned long int copy_num_2 = number;
-//   int flag_minus = 0;
-//   int sym_place = 0; 
-
-//   while (copy_num_2 > 0) {
-//     copy_num_2 /= 10;
-//     sym_place++;
-//   }
-//   if ((int)size - sym_place > 0) {
-//     flag_minus = 1;
-//   }
-//   if (options.is_blank == 1 && options.is_minus == 1) {
-//     sym_place++;
-//   }
-//   if (options.is_hash && options.number_system == 8) {
-//     options.flag_size = 1;
-//   } else if (options.is_hash && options.number_system == 16) {
-//     options.flag_size = 2;
-//   }
-
-//    if ((copy_num == 0 && size && options.is_dot != 1)) {
-//     string_for_number[i] = '0';
-//     i++;
-//     size--;
-//     copy_num /= 10;
-//   }
-//   if ((int)number < 0) {
-//     sym_place++;
-//   }
-
-//  while (copy_num && string_for_number && size) {
-//     if (flag_minus == 1 && options.is_minus) {
-//       while (((int)size - sym_place > 0) &&
-//              (!options.is_hash && options.number_system != 16)) {
-//         string_for_number[i] = ' ';
-//         i++;
-//         size--;
-//       }
-//     }
-//     char sym = convert_num_to_char(copy_num % options.number_system, options.upper_case);
-//     string_for_number[i] = sym;
-//     i++;
-//     size--;
-//     copy_num /= options.number_system;
-//   }
-
-//   if (options.accuracy - i > 0) {
-//     options.accuracy -= i;
-//     options.is_zero = 1;
-//   } else flag = 1;
-
-//   if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
-//     options.is_zero = 0;
-
-//  i = unsigned_decimal_handle_flags(string_for_number, options, size, i, number, flag);
-
-//  return i;
-// }
-
 char *print_u(char *str, Options options, char format, va_list *arg) {
   unsigned long int number = 0;
   if (format == 'l')
@@ -834,11 +724,15 @@ char *print_s(char *str, Options options, va_list *arg) {
   char *string = va_arg(*arg, char *);
   if (string) {
     int tmp = options.width, i = 0;
-    if ((s21_size_t)options.width < s21_strlen(string))
+    int blank = 0;
+    if ( (options.accuracy == 0 && options.is_dot == 1)){
+      blank = options.width;
+    }
+    else if ((s21_size_t)options.width < s21_strlen(string)) {
       options.width = s21_strlen(string);
-    int blank = options.width - s21_strlen(string);
-
-    if (options.accuracy == 0)
+      blank = options.width - s21_strlen(string);
+    }
+    if (options.accuracy == 0 && !options.is_dot)
       options.accuracy = options.width;
 
     if (options.accuracy != 0 && options.accuracy < tmp)
