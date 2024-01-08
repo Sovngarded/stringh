@@ -207,10 +207,6 @@ s21_size_t get_size_decimal(long int number, Options *options) {
   if ((s21_size_t)options->accuracy > result) {
     result = options->accuracy;
   }
-  // if (options->is_blank || options->is_plus || number < 0) {
-  //   options->flag_size = 1;
-  //   result++;
-  // }
   if (result == 0 && copy_num == 0 && !options->accuracy && !options->width &&
       !options->is_blank && !options->is_dot) {
     result++;
@@ -273,7 +269,7 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
   while (options.is_zero && string_for_number &&
          (size - options.flag_size > 0) &&
          (options.accuracy || flag_zero)) {
-    if ((size == 1 && options.flag_size == 1)) {
+    if (size == 1 && options.flag_size == 1) {
       break;
     }
     string_for_number[i] = '0';
@@ -308,153 +304,6 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
   }
   return i;
 }
-//////////////////////////////////////////
-// char *print_decimal(char *str, Options options, va_list *arguments) {
-//   long int number = 0;
-//   // записываем число в number
-//   if (options.addit_type == 'l') {
-//     number = (long int)va_arg(*arguments, long int);
-//   } else if (options.addit_type == 'h') {
-//     number = (short)va_arg(*arguments, int);
-//   } else {
-//     number = (int)va_arg(*arguments, int);
-//   }
-//     s21_size_t size = get_size_decimal(number, &options);
-//   char *string_for_number = malloc(sizeof(char) * size);
-//   if (string_for_number) {
-//     int i = decimal_to_string(number,options, string_for_number, size);
-//     str = reverse_and_pad(str, string_for_number, i, options.width);
-//   }
-//   if (string_for_number) {
-//     free(string_for_number);
-//   }
-//   *str = '\0';
-//   return str;
-// }
-
-// s21_size_t get_size_decimal(long int number, Options *options) {
-//   s21_size_t result = 0;
-//   long int copy_num = number;
-
-//   if (copy_num < 0) {
-//     copy_num = -number;
-//   }
-
-//   while (copy_num > 0) {
-//     copy_num /= 10;
-//     result++;
-//   }
-
-//   if (copy_num == 0 && result == 0 &&
-//       (options->is_blank && options->width && options->accuracy)) {
-//     result++;
-//   }
-
-//   if ((s21_size_t)options->width > result)
-//     result = options->width;
-//   if ((s21_size_t)options->accuracy > result)
-//     result = options->accuracy;
-
-//   if (options->is_blank || options->is_plus || number < 0) {
-//     options->flag_size = 1;
-//     result++;
-//   }
-
-//   if (result == 0 && copy_num == 0 && !options->width && !options->accuracy &&
-//       !options->is_blank && !options->is_dot)
-//     result++;
-
-//   return result;
-// }
-
-// // записываем число задом наперёд
-// int decimal_to_string(long int number, Options options, char *string_for_number,
-//                       s21_size_t size) {
-//   int change_sign = 0;
-// int flag_zero = 0;
-
-//   if (number < 0) {
-//     change_sign = 1;
-//     number = -number;
-//   }
-
-//   int i = 0;
-//   long int number_copy = number;
-
-//   if (number_copy == 0) {
-//     char c = convert_num_to_char(number_copy % options.number_system,
-//                                  options.upper_case);
-//     string_for_number[i] = c;
-//     i++;
-//     size--;
-//     // number_copy /= 10; //???
-//   }
-
-//   while (number_copy != 0 && string_for_number && size) {
-//     char c = convert_num_to_char(number_copy % options.number_system,
-//                                  options.upper_case);
-//     string_for_number[i] = c;
-//     i++;
-//     size--;
-//     number_copy /= 10;
-//   }
-
-//   if (change_sign == 1)
-//     number = -number;
-
-//   if (options.accuracy - i > 0) {
-//     options.accuracy -= i;
-//     options.is_zero = 1;
-//   } else
-//     flag_zero = 1;
-
-//   if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
-//     options.is_zero = 0;
-
-//   i = decimal_handle_flags(string_for_number, options, size, i, number, change_sign, flag_zero);
-//   return i;
-
-// }
-
-// int decimal_handle_flags(char *string_for_number, Options options,
-//                          s21_size_t size, int i, long int number, int change_sign, int flag_zero) {
-//   while (options.is_zero && string_for_number &&
-//          (size - options.flag_size - change_sign > 0) &&
-//          (options.accuracy || flag_zero)) {
-//     if ((size == 1 && options.flag_size == 1)) {
-//       break;
-//     }
-//     string_for_number[i] = '0';
-//     i++;
-//     size--;
-//     options.accuracy--;
-//   }
-//   if (options.is_blank && number >= 0 && size) {
-//     string_for_number[i] = ' ';
-//     i++;
-//     size--;
-//   }
-//   if (number < 0 && size) {
-//     string_for_number[i] = '-';
-//     i++;
-//     size--;
-//   }
-//   if (number > 0 && options.is_plus && size) {
-//     string_for_number[i] = '+';
-//     i++;
-//     size--;
-//   }
-
-//   if (size > 0 && options.is_minus == 0) {
-//     while ((size - options.flag_size > 0) && string_for_number) {
-//       string_for_number[i] = ' ';
-//       i++;
-//       size--;
-//     }
-//   }
-//   return i;
-// }
-///////////////////////////////////////
 
 char convert_num_to_char(int num, int upper_case) {
   char flag = '0';
@@ -724,7 +573,7 @@ char *print_s(char *str, Options options, va_list *arg) {
   char *string = va_arg(*arg, char *);
   if (string) {
     int tmp = options.width, i = 0;
-    int blank = 0;
+    int blank = tmp - s21_strlen(string);
     if ( (options.accuracy == 0 && options.is_dot == 1)){
       blank = options.width;
     }
@@ -739,7 +588,8 @@ char *print_s(char *str, Options options, va_list *arg) {
       blank = tmp - options.accuracy;
 
     while (blank && !options.is_minus) {
-      *str = ' ';
+      if(options.is_zero) *str = '0';
+      else *str = ' ';
       str++;
       blank--;
     }
@@ -758,6 +608,13 @@ char *print_s(char *str, Options options, va_list *arg) {
       blank--;
     }
   } else {
+    if(options.accuracy == 0 && options.is_dot){
+      while (options.width) {
+      *str = ' ';
+      str++;
+      options.width--;
+    }
+    } else {
     while (options.width > 6) {
       *str = ' ';
       str++;
@@ -765,6 +622,7 @@ char *print_s(char *str, Options options, va_list *arg) {
     }
     str = s21_memcpy(str, "(null)", 6);
     str += 6;
+  }
   }
   if (ptr)
     ptr = str;
