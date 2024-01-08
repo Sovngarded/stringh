@@ -71,6 +71,7 @@ const char *get_options(const char *format, Options *options) {
     }
     case '-': {
       options->is_minus = 1;
+
       break;
     }
     case ' ': {
@@ -269,6 +270,7 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
   if (size == 1 && options.is_zero == 1 && options.flag_size == 1) {
     options.is_zero = 0;
   }
+
   // обработка флага  0
   while (options.is_zero && string_for_number &&
          (size - options.flag_size > 0) &&
@@ -276,6 +278,8 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
     if ((size == 1 && options.flag_size == 1)) {
       break;
     }
+
+
     string_for_number[i] = '0';
     i++;
     size--;
@@ -838,7 +842,7 @@ char *print_s(char *str, Options options, va_list *arg) {
       options.width = s21_strlen(string);
     int blank = options.width - s21_strlen(string);
 
-    if (options.accuracy == 0)
+    if (options.accuracy == 0 && !options.is_dot)
       options.accuracy = options.width;
 
     if (options.accuracy != 0 && options.accuracy < tmp)
@@ -861,7 +865,7 @@ char *print_s(char *str, Options options, va_list *arg) {
     while (blank && options.is_minus) {
       *str = ' ';
       str++;
-      blank--;
+      blank--; 
     }
   } else {
     while (options.width > 6) {
@@ -972,7 +976,7 @@ s21_size_t add_parts_of_num_to_string(char *string, Options options, int accurac
                                long double integer_part) {
   long double copy_fractional_part = fractional_part;
 
-  if (fractional_part + 0.000001 >= 1) { //EDIT HERE
+  if (fractional_part + 0.00001 >= 1) { //EDIT HERE
     fractional_part = 0;
     integer_part += 1;
     size++;

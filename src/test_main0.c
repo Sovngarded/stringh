@@ -1933,7 +1933,7 @@ char *print_s(char *str, Options options, va_list *arg) {
       options.width = s21_strlen(string);
     int blank = options.width - s21_strlen(string);
 
-    if (options.accuracy == 0)
+    if (options.accuracy == 0 && !options.is_dot) 
       options.accuracy = options.width;
 
     if (options.accuracy != 0 && options.accuracy < tmp)
@@ -1959,11 +1959,7 @@ char *print_s(char *str, Options options, va_list *arg) {
       blank--;
     }
   } else {
-    while (options.width > 6) {
-      *str = ' ';
-      str++;
-      options.width--;
-    }
+  
     str = s21_memcpy(str, "(null)", 6);
     str += 6;
   }
@@ -2466,24 +2462,26 @@ int main() {
   // s21_sprintf(str2, str3, num, num, num);
   //    printf("%s\n\n", str1);
   //     printf("%s\n", str2);
-  char str1[400];
-  char str2[400];
+  //  WHAT  Test i don't care anymore, r Test     TEST 
+  //  WHAT  Test i don't care anymore, r Test PPAP TEST I don't feel so good
+  char str1[200];
+  char str2[200];
+  char *str3 = "%6.5s Test %.23s Test %3.s TEST %.s";
+  char *val = "WHAT IS THIS";
+  char *val2 = "i don't care anymore, really";
+  char *val3 = "PPAP";
+  char *val4 = "I don't feel so good";
+  sprintf(str1, str3, val, val2, val3, val4);
+  s21_sprintf(str2, str3, val, val2, val3, val4);
+  printf("%s\n%s",str1,str2);
 
-  char* str3 = "test: %.1Lf!\ntest: %.2Lf!\ntest: %.3Lf!";
-  long double num = -9999.99999;
-  sprintf(str1, str3, num, num, num);
-  s21_sprintf(str2, str3, num, num, num);
-  printf("%s-\n", str1);
-  printf("%s-\n", str2);
-  printf("\n");
-
-  str3 = "test: %-+ 025.5f!\ntest: %- 020.4f\ntest: %+ 016.6f!";
-  double numq = 837564.4753366;
-  sprintf(str1, str3, numq, numq, numq);
-                   s21_sprintf(str2, str3, numq, numq, numq);
-printf("%s-\n", str1);
-  printf("%s-\n", str2);
-  printf("\n");
+//   str3 = "test: %-+ 025.5f!\ntest: %- 020.4f\ntest: %+ 016.6f!";
+//   double numq = 837564.4753366;
+//   sprintf(str1, str3, numq, numq, numq);
+//                    s21_sprintf(str2, str3, numq, numq, numq);
+// printf("%s-\n", str1);
+//   printf("%s-\n", str2);
+//   printf("\n");
   
   // char str1[1024] = "";
   // char str2[1024] = "";

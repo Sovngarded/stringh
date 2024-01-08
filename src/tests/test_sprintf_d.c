@@ -244,8 +244,8 @@ START_TEST(sprintf_17_signed) {
   char str1[1024] = "";
   char str2[1024] = "";
   int val = -75;
-  sprintf(str1, "Hello %d %023d", val, val);  // нет нулей перед числом(бонус)
-  s21_sprintf(str2, "Hello %d %023d", val, val);
+  sprintf(str1, "Hello %d %05d", val, val);  // нет нулей перед числом(бонус)
+  s21_sprintf(str2, "Hello %d %05d", val, val);
   ck_assert_str_eq(str1, str2);
 }
 END_TEST
