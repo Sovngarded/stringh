@@ -614,11 +614,7 @@ char *print_s(char *str, Options options, va_list *arg) {
       blank--;
     }
   } else {
-    while (options.width > 6) {
-      *str = ' ';
-      str++;
-      options.width--;
-    }
+  
     str = s21_memcpy(str, "(null)", 6);
     str += 6;
   }
