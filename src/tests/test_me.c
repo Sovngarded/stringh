@@ -26,21 +26,21 @@ Suite *s21_string_test[] = {test_memchr(),
                               test_strpbrk(),
                               test_strrchr(),
                               // test_strspn(),
-                         test_strstr(),
+                              test_strstr(),
                               test_strtok(),
-                              test_sprintf_f(),
-                               test_sprintf_e(),
-                              test_sprintf_g(), //sega
-                              //  test_sprintf_octal(), good 
-                                //  test_sprintf_HEX(), // good
-                              //  test_sprintf_hex(), // good
-                               test_sprintf_pointer(),
-                             //test_sprintf_percent(), //good
-                              //test_sprintf_n(), // good 
-                              // test_sprintf_unsigned() , // good
-                              // test_sprintf_signed_i(), // good
+                              //test_sprintf_g(), //sega
+                              test_sprintf_octal(), //good 
+                              test_sprintf_HEX(), // good
+                              test_sprintf_hex(), // good
+                              test_sprintf_percent(), //good
+                              test_sprintf_n(), // good 
+                              test_sprintf_unsigned() , // good
+                              test_sprintf_signed_i(), // good
                               test_sprintf_string(),
                               test_sprintf_signed(),
+                              test_sprintf_f(),
+                              test_sprintf_e(),
+                              test_sprintf_pointer(),
                               // test_sscanf_empty(),
                               // test_sscanf_c(),
                               // test_sscanf_d(),

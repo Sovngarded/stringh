@@ -44,7 +44,7 @@ const char *set_options(Options *options, const char *format, va_list *arg) {
 
   if (*format == '.') {
     options->is_dot = 1;
-    if (options->width && !options->accuracy && (options->e || !options->e))
+    if (options->width && !options->accuracy && options->is_zero)
       options->is_zero = 1; 
     else
       options->is_zero = 0;
@@ -74,6 +74,7 @@ const char *get_options(const char *format, Options *options) {
     }
     case '-': {
       options->is_minus = 1;
+
       break;
     }
     case ' ': {
@@ -196,10 +197,12 @@ s21_size_t get_size_decimal(long int number, Options *options) {
   if (copy_num < 0) {
     copy_num = -copy_num;
   }
+  // int num_size = 0;
   while (copy_num > 0) {
     copy_num /= 10;
     result++;
   }
+  // num_size = result;
   if (copy_num == 0 && result == 0 &&
       (options->accuracy || options->width || options->is_blank)) {
     result++;
@@ -210,17 +213,14 @@ s21_size_t get_size_decimal(long int number, Options *options) {
   if ((s21_size_t)options->accuracy > result) {
     result = options->accuracy;
   }
-  // if (options->is_blank || options->is_plus || number < 0) {
-  //   options->flag_size = 1;
-  //   result++;
-  // }
   if (result == 0 && copy_num == 0 && !options->accuracy && !options->width &&
       !options->is_blank && !options->is_dot) {
     result++;
   }
   if (options->is_blank || options->is_plus || number <= 0) {
     options->flag_size = 1;
-    result++;
+    if(options->width && options->is_zero && options->accuracy < options->width) result = result;
+    else result++;
   }
   return result;
 }
@@ -272,13 +272,16 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
   if (size == 1 && options.is_zero == 1 && options.flag_size == 1) {
     options.is_zero = 0;
   }
+
   // обработка флага  0
   while (options.is_zero && string_for_number &&
          (size - options.flag_size > 0) &&
          (options.accuracy || flag_zero)) {
-    if ((size == 1 && options.flag_size == 1)) {
+    if (size == 1 && options.flag_size == 1) {
       break;
     }
+
+
     string_for_number[i] = '0';
     i++;
     size--;
@@ -437,7 +440,7 @@ int unsigned_decimal_handle_flags(char *string_for_number, Options options,
       i++;
       size--;
     } else if (options.is_hash && options.number_system == 16 &&
-               !options.upper_case && size > 1  && number != 0) {
+               !options.upper_case && size > 1 && number != 0) {
       string_for_number[i] = 'x';
       i++;
       size--;
@@ -523,6 +526,8 @@ int i = 0;
 
  return i;
 }
+
+
 char *print_u(char *str, Options options, char format, va_list *arg) {
   unsigned long int number = 0;
   if (format == 'l')
@@ -582,11 +587,10 @@ char *print_s(char *str, Options options, va_list *arg) {
     if ( (options.accuracy == 0 && options.is_dot == 1)){
       blank = options.width;
     }
-    else  if ((s21_size_t)options.width < s21_strlen(string)) {
+    else if ((s21_size_t)options.width < s21_strlen(string)) {
       options.width = s21_strlen(string);
       blank = options.width - s21_strlen(string);
     }
-
     if (options.accuracy == 0 && !options.is_dot)
       options.accuracy = options.width;
 
@@ -611,12 +615,24 @@ char *print_s(char *str, Options options, va_list *arg) {
     while (blank && options.is_minus) {
       *str = ' ';
       str++;
-      blank--;
+      blank--; 
     }
   } else {
-  
+    if(options.accuracy == 0 && options.is_dot){
+      while (options.width) {
+      *str = ' ';
+      str++;
+      options.width--;
+    }
+    } else {
+    while (options.width > 6) {
+      *str = ' ';
+      str++;
+      options.width--;
+    }
     str = s21_memcpy(str, "(null)", 6);
     str += 6;
+  }
   }
   if (ptr)
     ptr = str;
@@ -673,7 +689,8 @@ s21_size_t get_size_double(Options *options, long double number) {
   }
    if (options->is_blank || options->is_plus || (number < 0.0000000000001 && number != 0)) {
     options->flag_size = 1;
-    result++;
+    if(options->is_plus && options->width >=0 && options->is_zero) result = result;
+    else result++;
   }
   return result;
 }
@@ -718,7 +735,15 @@ s21_size_t add_parts_of_num_to_string(char *string, Options options, int accurac
                                long double integer_part) {
   long double copy_fractional_part = fractional_part;
 
-  if (fractional_part + 0.000001 >= 1) { //EDIT HERE
+  double add = 0.000001;
+  if(accuracy == 6) add = 0.000001;
+  if(accuracy == 5) add = 0.00001;
+  if(accuracy == 4) add = 0.0001;
+  if(accuracy == 3) add = 0.001;
+  if(accuracy == 2) add = 0.01;
+  if(accuracy == 1) add = 0.1;
+
+  if (fractional_part + add >= 1) {
     fractional_part = 0;
     integer_part += 1;
     size++;
@@ -802,7 +827,7 @@ int double_handle_flags(char *string_for_number, Options options,
                         s21_size_t size, int i, long double number) {
     while (options.is_zero && string_for_number &&
            (size - options.flag_size > 0))  {
-    if (size - 1 == 1 && options.flag_size == 1)
+    if (size == 1 && options.flag_size == 1)
       break;
     string_for_number[i] = '0';
     i++;
@@ -1107,39 +1132,37 @@ char *print_p(char *str, Options *options, va_list *arg) {
 }
 
 
+
 int main() {
   // char buffer[200];
-  // char str1[400];
-  // char str2[400];
-  // char *str3 = "test: %015f!\ntest: %-026f!\ntest: %+018f!";
-  // double num = -947.6785643;
-  // sprintf(str1, str3, num, num, num);
-  // s21_sprintf(str2, str3, num, num, num);
-  //    printf("%s\n\n", str1);
-  //     printf("%s\n", str2);
-
+  
 char str1[400];
   char str2[400];
-  //char *str3 = "%0s Test %06s Test %05.7s TEST %0.7s Oof %0.s";
-
-  int vall = -75;
-  sprintf(str1, "Hello %d %05d", vall, vall);  // нет нулей перед числом(бонус)
-  s21_sprintf(str2, "Hello %d %05d", vall, vall);
-    printf("%s-\n", str1);
+  
+   char*  str3 = "test: %+ 0Lf!\ntest: %.6Lf!\ntest: %.15Lf!";
+  long double num = -635293201236310753.6495633;
+   sprintf(str1, str3, num, num, num);
+                   s21_sprintf(str2, str3, num, num, num);
+ printf("%s-\n", str1);
       printf("%s-\n", str2);
+printf("\n");
+                  str3 = "test: %+ 0Lf!\ntest: %.6Lf!\ntest: %.15Lf!";
+  num = -236310753.6495633;
+   sprintf(str1, str3, num, num, num);
+                   s21_sprintf(str2, str3, num, num, num);
+ printf("%s-\n", str1);
+      printf("%s-\n", str2);
+printf("\n");
 
-  // char* str3 = "%ld Test %ld Test %hd GOD %hd tt %d tt %d";
-  // long int val = LONG_MAX;
-  // long val2 = LONG_MIN;
-  // short int val3 = SHRT_MAX;
-  // short val4 = SHRT_MIN;
-  // int val5 = INT_MAX;
-  // int val6 = INT_MIN;
-  // sprintf(str1, str3, val, val2, val3, val4, val5, val6);
-  // s21_sprintf(str2, str3, val, val2, val3, val4, val5, val6);
-  //  printf("%s-\n", str1);
-  //     printf("%s-\n", str2);
- 
+//                    str3 = "test: %015f!\ntest: %-026f!\ntest: %+018f!";
+//    num = -947.6785643;
+//   sprintf(str1, str3, num, num, num);
+//                    s21_sprintf(str2, str3, num, num, num);
+//  printf("%s-\n", str1);
+//       printf("%s-\n", str2);
+// printf("\n");
+
+
 //     //Specifier: c
 //     char charValue = 'A';
 //     s21_sprintf(buffer, "Specifier: %%c - Character: %c", charValue);

@@ -216,7 +216,8 @@ s21_size_t get_size_decimal(long int number, Options *options) {
   }
   if (options->is_blank || options->is_plus || number <= 0) {
     options->flag_size = 1;
-    result++;
+    if(options->width && options->is_zero && options->accuracy < options->width) result = result;
+    else result++;
   }
   return result;
 }
@@ -685,7 +686,8 @@ s21_size_t get_size_double(Options *options, long double number) {
   }
    if (options->is_blank || options->is_plus || (number < 0.0000000000001 && number != 0)) {
     options->flag_size = 1;
-    result++;
+    if(options->is_plus && options->width && options->is_zero) result = result;
+    else result++;
   }
   return result;
 }
@@ -730,7 +732,15 @@ s21_size_t add_parts_of_num_to_string(char *string, Options options, int accurac
                                long double integer_part) {
   long double copy_fractional_part = fractional_part;
 
-  if (fractional_part + 0.00001 >= 1) { //EDIT HERE
+  double add = 0.000001;
+  if(accuracy == 6) add = 0.000001;
+  if(accuracy == 5) add = 0.00001;
+  if(accuracy == 4) add = 0.0001;
+  if(accuracy == 3) add = 0.001;
+  if(accuracy == 2) add = 0.01;
+  if(accuracy == 1) add = 0.1;
+
+  if (fractional_part + add >= 1) {
     fractional_part = 0;
     integer_part += 1;
     size++;
