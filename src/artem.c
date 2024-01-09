@@ -1,12 +1,3 @@
-#include "s21_sprintf.h"
-#include "s21_string.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#define ALPHABET 32 
-
-
 int s21_sprintf(char *str, const char *format, ...) {
   char *copy_str = str;
   char flags[] = "cdieEfFgGosuxXpn%";
@@ -406,7 +397,7 @@ s21_size_t get_size_unsigned_decimal(unsigned long int number,
     result++;
   }
   if (options->is_hash && options->number_system == 16) result += 2;
-  if (options->is_hash && options->number_system == 8) result++;
+  if (options->is_hash && options->number_system == 8 ) result++;
   return result;
 }
 
@@ -447,7 +438,7 @@ int unsigned_decimal_handle_flags(char *string_for_number, Options options,
     }
     
   if (size > 0 && options.is_minus == 0) {
-    while ((size - options.flag_size > 0 && size > 0) && string_for_number && !options.is_hash && (options.is_blank == 1 || options.is_plus == 1 || options.width != 0))/*&& (options.is_blank != 1 && options.width != 0)*/ {
+    while ((size - options.flag_size > 0 && size > 0) && string_for_number && (options.is_blank == 1 || options.is_plus == 1 || options.width != 0))/*&& (options.is_blank != 1 && options.width != 0)*/ {
       string_for_number[i] = ' ';
       i++;
       size--;
@@ -837,7 +828,7 @@ int double_handle_flags(char *string_for_number, Options options,
     i++;
     size--;
   }
-  if ( (number < 0 && number!= 0) && size && !options.e) {
+  if (number < 0.0000000000001 && size && !options.e && number != 0) {
     string_for_number[i] = '-';
     if (options.e && options.flag_size && options.width) options.flag_size = 0;
     i++;
@@ -849,7 +840,7 @@ int double_handle_flags(char *string_for_number, Options options,
     i++;
     size--;
   }
-  if ( number >= 0 && options.is_plus && size) {
+  if ( (number > 0.0000000000001 || number == 0) && options.is_plus && size) {
     string_for_number[i] = '+';
     i++;
     size--;
