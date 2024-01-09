@@ -6,17 +6,8 @@ FILES = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c \
 		s21_strtok.c s21_strerror.c s21_strpbrk.c s21_insert.c \
 		s21_trim.c s21_to_lower.c s21_to_upper.c s21_strcpy.c \
 		s21_sprintf.c
-FILE_TESTS =./tests/test_me.c ./tests/test_memchr.c ./tests/test_memcmp.c ./tests/test_memcpy.c \
-		./tests/test_memset.c ./tests/test_strncat.c ./tests/test_strchr.c ./tests/test_strncmp.c \
-		./tests/test_strncpy.c ./tests/test_strlen.c ./tests/test_strrchr.c ./tests/test_strtok.c \
-		./tests/test_strstr.c ./tests/test_strcspn.c ./tests/test_strerror.c ./tests/test_strpbrk.c \
-		./tests/test_strcpy.c ./tests/test_insert.c ./tests/test_to_lower.c \
-		./tests/test_to_upper.c ./tests/test_trim.c ./tests/test_sprintf_pointer.c \
-		./tests/test_sprintf_percent.c ./tests/test_sprintf_n.c ./tests/test_sprintf_i.c ./tests/test_sprintf_d.c \
-		./tests/test_sprintf_string.c ./tests/test_sprintf_f.c ./tests/test_sprintf_unsigned.c \
-		./tests/test_sprintf_e.c ./tests/test_sprintf_g.c ./tests/test_sprintf_octal.c ./tests/test_sprintf_hex1.c \
-		./tests/test_sprintf_hex2.c 
-FILE_TESTS_S = ./suites/suite_insert.c ./suites/suite_memchr.c ./suites/suite_memcpy.c ./suites/suite_memset.c \
+
+FILE_TESTS_S = 	test.c ./suites/suite_insert.c ./suites/suite_memchr.c ./suites/suite_memcpy.c ./suites/suite_memset.c \
 				./suites/suite_strchr.c ./suites/suite_strcspn.c ./suites/suite_strerror.c ./suites/suite_strlen.c ./suites/suite_strncat.c \
 				./suites/suite_strncmp.c ./suites/suite_strncpy.c ./suites/suite_strpbrk.c ./suites/suite_strrchr.c ./suites/suite_strstr.c \
 				./suites/suite_strtok.c ./suites/suite_to_lower.c ./suites/suite_to_upper.c ./suites/suite_trim.c \
@@ -31,24 +22,21 @@ $(TARGET):
 	$(CC) ${CFLAGS} -c ${FILES}
 	ar rc libs21_string.a s21*.o
 	ranlib libs21_string.a
-	cp libs21_string.a s21_string.as
+	cp libs21_string.a s21_string.a
 
 test: $(TARGET)
 	ar rc libs21_string.a s21*.o
 	ranlib libs21_string.a
-	$(CC) test.c  ${CFLAGS} ${FILES} ${FILE_TESTS_S} libs21_string.a s21_string.h s21_sprintf.h ${TEST_FLAGS} -o s21_string --coverage
+	$(CC) ${CFLAGS} ${FILES} ${FILE_TESTS_S} libs21_string.a s21_string.h  ${TEST_FLAGS} -o s21_string --coverage
 	@echo "---------------------------TESTS--------------------------------------" 
 	./s21_string
 	@echo "----------------------------------------------------------------------"
 
-run:
-#	gcc -g -Wall -Wextra -Werror -std=c11 -lm s21_sprintf.c s21_memcpy.c s21_strlen.c s21_strncpy.c s21_strchr.c
-	gcc -g -Wall -Wextra -Werror -std=c11 -lm test_main0.c s21_memcpy.c s21_strlen.c s21_strncpy.c s21_strchr.c	
 
 gcov_report: test 
-	lcov -t "test" -o test.info -c -d .	
-	genhtml -o report test.info
-	open ./report/src/index.html
+	lcov -t "gcov_report" -o Coverage_Report.info -c -d .
+	genhtml -o ./report Coverage_Report.info
+	rm -f *.gcno *.gcda *.info report.out *.gcov
 
 clean:
 	rm -rf s21_math
