@@ -406,7 +406,7 @@ s21_size_t get_size_unsigned_decimal(unsigned long int number,
     result++;
   }
   if (options->is_hash && options->number_system == 16) result += 2;
-  if (options->is_hash && options->number_system == 8) result++;
+  if (options->is_hash && options->number_system == 8 ) result++;
   return result;
 }
 
@@ -445,9 +445,9 @@ int unsigned_decimal_handle_flags(char *string_for_number, Options options,
       i++;
       size--;
     }
-    
+
   if (size > 0 && options.is_minus == 0) {
-    while ((size - options.flag_size > 0 && size > 0) && string_for_number && !options.is_hash && (options.is_blank == 1 || options.is_plus == 1 || options.width != 0))/*&& (options.is_blank != 1 && options.width != 0)*/ {
+    while (( size - options.flag_size > 0 && size > 0) && string_for_number && (options.is_blank != 1 && options.width != 0) )/*&& (options.is_blank != 1 && options.width != 0)*/ {
       string_for_number[i] = ' ';
       i++;
       size--;
@@ -455,7 +455,11 @@ int unsigned_decimal_handle_flags(char *string_for_number, Options options,
   }
   return i;
 }
+// str1 == "20 Test 22c3 Test 001670e TEST       7e37 GOD 17"
+// str2 == "20 Test 22c3 Test 001670e TEST 7e37       GOD 17"
 
+// str1 == "40 Test 21303 Test 0263416 TEST      77067 GOD 27"
+// str2 == "40 Test 21303 Test 0263416 TEST 77067      GOD 27"
 int unsigned_decimal_to_string(char *string_for_number, Options options,
                                unsigned long int number, s21_size_t size) {
 
@@ -837,7 +841,7 @@ int double_handle_flags(char *string_for_number, Options options,
     i++;
     size--;
   }
-  if ( (number < 0 && number!= 0) && size && !options.e) {
+  if ((number < 0.0000000000001 || number == -0.0) && size && !options.e && number != 0.0) {
     string_for_number[i] = '-';
     if (options.e && options.flag_size && options.width) options.flag_size = 0;
     i++;
@@ -849,7 +853,7 @@ int double_handle_flags(char *string_for_number, Options options,
     i++;
     size--;
   }
-  if ( number >= 0 && options.is_plus && size) {
+  if ( (number > 0.0000000000001 || number == 0.0) && options.is_plus && size) {
     string_for_number[i] = '+';
     i++;
     size--;
@@ -1094,7 +1098,7 @@ s21_size_t is_nan_or_inf(char *str, long double number, Options option) {
       s21_strncpy(str, "fni", 3);
     }
     flag = 3;
-  } else if (number == -INFINITY) {
+  } else if (number == -INFINITY) { 
     if (option.upper_case) {
       s21_strncpy(str, "FNI-", 4);
     } else {

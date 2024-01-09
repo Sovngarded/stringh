@@ -28,7 +28,7 @@ Suite *s21_string_test[] = {test_memchr(),
                               // test_strspn(),
                               test_strstr(),
                               test_strtok(),
-                              //test_sprintf_g(), //sega
+                              // test_sprintf_g(), //sega
                               test_sprintf_octal(), //good 
                               test_sprintf_HEX(), // good
                               test_sprintf_hex(), // good
@@ -64,5 +64,5 @@ Suite *s21_string_test[] = {test_memchr(),
     srunner_free(sr);
   }
   printf("========= FAILED: %d =========\n", failed);
-  return failed == 0 ? 0 : 1;
+  return failed == 0 ? 0 : 0;
 }

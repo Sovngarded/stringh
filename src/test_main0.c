@@ -1164,10 +1164,10 @@ char str1[400];
 //       printf("%s-\n", str2);
 // printf("\n");
 
-char* str3 = "% o Hello % 3.o  %7oWorld % 5.7o Hello +% #o+ % -o %+o % .o % .o";
-  int num = 0;
- s21_sprintf(str2, str3, num, num, num, num, num, num, num, num, num);
-sprintf(str1, str3, num, num, num, num, num, num, num, num, num);
+char* str3 = "%g TEST %.g TEST %4g TEST %4.g TEST %#5.10g!";
+  double num = -0.0000756589367;
+  sprintf(str1, str3, num, num, num, num, num);
+                   s21_sprintf(str2, str3, num, num, num, num, num);
 printf("orig\n");
  
  printf("%s-\n", str1);

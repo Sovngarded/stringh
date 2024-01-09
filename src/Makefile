@@ -16,10 +16,14 @@ FILE_TESTS =./tests/test_me.c ./tests/test_memchr.c ./tests/test_memcmp.c ./test
 		./tests/test_sprintf_string.c ./tests/test_sprintf_f.c ./tests/test_sprintf_unsigned.c \
 		./tests/test_sprintf_e.c ./tests/test_sprintf_g.c ./tests/test_sprintf_octal.c ./tests/test_sprintf_hex1.c \
 		./tests/test_sprintf_hex2.c 
-		
+FILE_TESTS_S = ./suites/suite_insert.c ./suites/suite_memchr.c ./suites/suite_memcpy.c ./suites/suite_memset.c \
+				./suites/suite_strchr.c ./suites/suite_strcspn.c ./suites/suite_strerror.c ./suites/suite_strlen.c ./suites/suite_strncat.c \
+				./suites/suite_strncmp.c ./suites/suite_strncpy.c ./suites/suite_strpbrk.c ./suites/suite_strrchr.c ./suites/suite_strstr.c \
+				./suites/suite_strtok.c ./suites/suite_to_lower.c ./suites/suite_to_upper.c ./suites/suite_trim.c \
+				./suites/suite_sprintf.c ./suites/suite_memcmp.c 
 
 TARGET=s21_string.a
-TEST_FLAGS = -lcheck -lm #-lsubunit
+TEST_FLAGS = -lcheck #-lm #-lsubunit
 
 all: gcov_report
 
@@ -30,14 +34,16 @@ $(TARGET):
 	cp libs21_string.a s21_string.as
 
 test: $(TARGET)
-	$(CC) ${CFLAGS} ${FILES} ${FILE_TESTS} s21_string.h s21_sprintf.h ${TEST_FLAGS} -o s21_string --coverage
+	ar rc libs21_string.a s21*.o
+	ranlib libs21_string.a
+	$(CC) test.c  ${CFLAGS} ${FILES} ${FILE_TESTS_S} libs21_string.a s21_string.h s21_sprintf.h ${TEST_FLAGS} -o s21_string --coverage
 	@echo "---------------------------TESTS--------------------------------------" 
 	./s21_string
 	@echo "----------------------------------------------------------------------"
 
 run:
 #	gcc -g -Wall -Wextra -Werror -std=c11 -lm s21_sprintf.c s21_memcpy.c s21_strlen.c s21_strncpy.c s21_strchr.c
-	gcc -g -Wall -Wextra -Werror -std=c11 -lm test_main0.c s21_memcpy.c s21_strlen.c s21_strncpy.c s21_strchr.c
+	gcc -g -Wall -Wextra -Werror -std=c11 -lm test_main0.c s21_memcpy.c s21_strlen.c s21_strncpy.c s21_strchr.c	
 
 gcov_report: test 
 	lcov -t "test" -o test.info -c -d .	
@@ -58,4 +64,4 @@ clean:
 	rm -rf *.css
 	rm -rf test
 	rm -rf gcov_test
-	rm -rf test repor
+	rm -rf test report
