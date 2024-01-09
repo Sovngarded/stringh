@@ -187,19 +187,16 @@ char *print_decimal(char *str, Options options, va_list *arguments) {
   return str;
 }
 
-// функция для подсчёта размера для buffer
 s21_size_t get_size_decimal(long int number, Options *options) {
   s21_size_t result = 0;
   long int copy_num = number;
   if (copy_num < 0) {
     copy_num = -copy_num;
   }
-  // int num_size = 0;
   while (copy_num > 0) {
     copy_num /= 10;
     result++;
   }
-  // num_size = result;
   if (copy_num == 0 && result == 0 &&
       (options->accuracy || options->width || options->is_blank)) {
     result++;
@@ -222,7 +219,6 @@ s21_size_t get_size_decimal(long int number, Options *options) {
   return result;
 }
 
-// записываем число задом наперёд
 int decimal_to_string(long int number, Options options, char *string_for_number,
                       s21_size_t size) {
   int flag = 0;
@@ -235,7 +231,6 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
   int i = 0;
   long int copy_num = number;
 
-  // запись числа в буферный массив, если число == 0
  if (copy_num == 0 && !options.accuracy &&
        !options.is_blank && !options.is_dot) {
     char sym = copy_num % options.number_system + '0';
@@ -245,7 +240,6 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
     copy_num /= 10;
   }
 
-  // запись числа в буферный массив, если число не 0
   while (copy_num != 0 && string_for_number != 0 && size != 0) {
     char sym = convert_num_to_char(copy_num % options.number_system, options.upper_case);
     string_for_number[i] = sym;
@@ -253,38 +247,32 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
     size--;
     copy_num /= 10;
   }
-
   if (flag) {
     number = -number;
   }
 
-  // проверка на то, можем ли мы применить флаг 0
-  if (options.accuracy - i > 0) {  // если точность больше чем ширина
+  if (options.accuracy - i > 0) { 
     options.accuracy -= i;
     options.is_zero = 1;
   } else {
     flag_zero = 1;
   }
-  // если не осталось места под нули
   if (size == 1 && options.is_zero == 1 && options.flag_size == 1) {
     options.is_zero = 0;
   }
 
-  // обработка флага  0
   while (options.is_zero && string_for_number &&
          (size - options.flag_size > 0) &&
          (options.accuracy || flag_zero)) {
     if (size == 1 && options.flag_size == 1) {
       break;
     }
-
-
     string_for_number[i] = '0';
     i++;
     size--;
     options.accuracy--;
   }
-  // обработка флагов +, -, пробел
+
   if (options.is_blank && number >= 0 && size) {
     string_for_number[i] = ' ';
     i++;
@@ -301,7 +289,6 @@ int decimal_to_string(long int number, Options options, char *string_for_number,
     size--;
   }
 
-  // обработка ситуации, когда осталось свободное место в строке
   if (size > 0 && options.is_minus == 0) {
     while ((size - options.flag_size > 0) && string_for_number) {
       string_for_number[i] = ' ';
@@ -355,7 +342,6 @@ char* reverse_and_pad(char *str, const char *string_for_number, int length, int 
   return str;
 }
 
-// unsingned + x, o,
 Options set_number_system(Options options, char format) {
   switch (format) {
   case 'o': {
@@ -447,7 +433,7 @@ int unsigned_decimal_handle_flags(char *string_for_number, Options options,
     }
 
   if (size > 0 && options.is_minus == 0) {
-    while (( size - options.flag_size > 0 && size > 0) && string_for_number && (options.is_blank != 1 && options.width != 0) )/*&& (options.is_blank != 1 && options.width != 0)*/ {
+    while (( size - options.flag_size > 0 && size > 0) && string_for_number && ((options.is_blank != 1 && options.width != 0) || ((options.is_blank == 1 || options.is_plus == 1 || options.width != 0) && !options.is_hash)) ){
       string_for_number[i] = ' ';
       i++;
       size--;
@@ -455,15 +441,10 @@ int unsigned_decimal_handle_flags(char *string_for_number, Options options,
   }
   return i;
 }
-// str1 == "20 Test 22c3 Test 001670e TEST       7e37 GOD 17"
-// str2 == "20 Test 22c3 Test 001670e TEST 7e37       GOD 17"
 
-// str1 == "40 Test 21303 Test 0263416 TEST      77067 GOD 27"
-// str2 == "40 Test 21303 Test 0263416 TEST 77067      GOD 27"
 int unsigned_decimal_to_string(char *string_for_number, Options options,
                                unsigned long int number, s21_size_t size) {
-
-int i = 0;
+  int i = 0;
   int flag = 0;
   unsigned long int copy_num = number;
   unsigned long int copy_num_2 = number;
@@ -516,10 +497,6 @@ int i = 0;
     options.accuracy -= sym_place;
     options.is_zero = 1;
   }  else flag = 1;
-  // else if (options.is_minus && options.accuracy - (i - options.width))
-  // {
-  //   /* code */
-  // }
   if (size == 1 && options.is_zero == 1 && options.flag_size == 1)
     options.is_zero = 0;
 
@@ -527,7 +504,6 @@ int i = 0;
 
  return i;
 }
-
 
 char *print_u(char *str, Options options, char format, va_list *arg) {
   unsigned long int number = 0;
@@ -552,7 +528,6 @@ char *print_u(char *str, Options options, char format, va_list *arg) {
   *str = '\0';
   return str;
 }
-// end unsingned + x, o,
 
 char *print_c(char *str, Options options, int symbol) {
   char *ptr = S21_NULL;
@@ -643,7 +618,6 @@ char *print_s(char *str, Options options, va_list *arg) {
   return ptr;
 }
 
-// double f F
 Options set_opt_double(Options options, char format) {
   if (format == 'g' || format == 'G')
     options.g = 1;
@@ -655,8 +629,6 @@ Options set_opt_double(Options options, char format) {
 }
 
 s21_size_t get_size_double(Options *options, long double number) {
-  //разбиваем на две части (целая6 дробная) + место под точку
-  //если асс или видтх больше6 то добавляем
   if (!options->accuracy && !options->is_dot) {
     options->accuracy = 6;
   }
@@ -898,7 +870,7 @@ int double_to_string(long double number, Options options,
     if (flag)
       number = -number;
 
-    if (options.accuracy - i > 0) {  // если точность больше чем ширина
+    if (options.accuracy - i > 0) {
       options.accuracy -= i;
       options.is_zero = 1;
     } else
@@ -925,7 +897,6 @@ char *print_double(char *str, Options options, char format, va_list *arg) {
 
   if (string_for_number) {
     int i = double_to_string(number, options, string_for_number, size, e);
-    // reverse
     str = reverse_and_pad(str, string_for_number, i, options.width);
   }
   if (string_for_number)
@@ -934,13 +905,8 @@ char *print_double(char *str, Options options, char format, va_list *arg) {
   *str = '\0';
   return str;
 }
-// end double f F
 
-// e E g G
 s21_size_t get_size_eg(Options *option, long double number) {
-  //разбиваем на две части (целая6 дробная) + место под точку
-  //место под е и + под 0n
-  //если асс или видтх больше6 то добавляем
   int size = 0;
   int flag = 0;
   if (!option->accuracy && !option->g && !option->is_dot) {
@@ -999,7 +965,7 @@ s21_size_t get_size_eg(Options *option, long double number) {
     size++;
   }
   if (option->e) {
-    size += 3;  // integer +/- E/e
+    size += 3;
     size += option->accuracy + 1;
     if (option->is_plus || option->is_blank || number < 0) {
       size++;
@@ -1038,7 +1004,6 @@ char *print_eg(char *str, Options options, char format, va_list *arg) {
   char *string_for_number = malloc(sizeof(char) * size);
   if (string_for_number) {
     int i = double_to_string(number, options, string_for_number, size, e);
-    // reverse
     str = reverse_and_pad(str, string_for_number, i, options.width);
   }
   if (string_for_number)
@@ -1108,8 +1073,6 @@ s21_size_t is_nan_or_inf(char *str, long double number, Options option) {
   }
   return flag;
 }
-
-// end e E g G
 
 char *print_p(char *str, Options *options, va_list *arg) {
   unsigned long int ptr = (unsigned long int)va_arg(*arg, unsigned long int);
